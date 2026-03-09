@@ -1,7 +1,9 @@
-import { getLeadDetails, getLeadMessages } from './actions'
+import { getLeadDetails, getLeadMessages, getLeadQualification } from './actions'
 import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
 import MessageInput from './_components/MessageInput'
+import SimulateAIAction from './_components/SimulateAIAction'
+import QualificationResultBlock from './_components/QualificationResultBlock'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -29,9 +31,10 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
     }
 
     // Fetch data concurrently
-    const [leadRes, messagesRes] = await Promise.all([
+    const [leadRes, messagesRes, qualRes] = await Promise.all([
         getLeadDetails(leadId),
-        getLeadMessages(leadId)
+        getLeadMessages(leadId),
+        getLeadQualification(leadId)
     ])
 
     // Handle Unauthenticated
@@ -63,6 +66,7 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
 
     const lead = leadRes.data
     const messages = messagesRes.data || []
+    const qualification = qualRes?.data || null
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -89,8 +93,16 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                     {/* Left Column: Lead Summary (Static Context) */}
-                    <div className="lg:col-span-4 h-full">
+                    <div className="lg:col-span-4 h-full flex flex-col gap-6">
+                        {lead.current_status === 'classificado' && qualification && (
+                            <QualificationResultBlock result={qualification} />
+                        )}
+
                         <LeadSummaryCard lead={lead} />
+
+                        {lead.current_status === 'em_processamento' && (
+                            <SimulateAIAction leadId={lead.id} />
+                        )}
                     </div>
 
                     {/* Right Column: Message Timeline */}

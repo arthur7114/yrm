@@ -1,4 +1,5 @@
 ﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
 
 node.exe : ÔÜá The 
 "middleware" file 
@@ -29,14 +30,14 @@ oteException
   andError
  
   Creating an optimized production build ...
-Ô£ô Compiled successfully in 8.0s
+Ô£ô Compiled successfully in 16.3s
   Running TypeScript ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/5) ...
   Generating static pages using 7 workers (1/5) 
   Generating static pages using 7 workers (2/5) 
   Generating static pages using 7 workers (3/5) 
-Ô£ô Generating static pages using 7 workers (5/5) in 260.0ms
+Ô£ô Generating static pages using 7 workers (5/5) in 384.0ms
   Finalizing page optimization ...
 
 Route (app)

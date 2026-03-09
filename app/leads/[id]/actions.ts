@@ -125,3 +125,73 @@ export async function getLeadMessages(leadId: number): Promise<FetchState<LeadMe
 
     return { success: true, data: data as LeadMessage[] }
 }
+
+import { revalidatePath } from 'next/cache'
+
+export async function sendSimulatedMessage(leadId: number, content: string): Promise<FetchState> {
+    if (!content.trim()) return { success: false, message: 'Message content cannot be empty' }
+
+    const { supabase, user } = await getAuthClient()
+    if (!user) return { success: false, message: 'Não autenticado' }
+
+    // 1. Verify ownership
+    const { data: leadAccess, error: accessError } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('id', leadId)
+        .eq('user_id', user.id)
+        .single()
+
+    if (accessError || !leadAccess) {
+        return { success: false, message: 'Lead não encontrado ou acesso restrito.' }
+    }
+
+    // 2. Insert message
+    const { data: newMessage, error: insertError } = await supabase
+        .from('messages')
+        .insert({
+            lead_id: leadId,
+            message_content: content.trim(),
+            sender_type: 'lead'
+        })
+        .select('id')
+        .single()
+
+    if (insertError || !newMessage) {
+        console.error("Insert message error:", insertError)
+        return { success: false, message: 'Falha ao registrar a mensagem.' }
+    }
+
+    // 3. Update lead status to 'em_processamento'
+    const { error: updateError } = await supabase
+        .from('leads')
+        .update({
+            current_status: 'em_processamento',
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', leadId)
+
+    if (updateError) {
+        console.error("Update lead status error:", updateError)
+        return { success: false, message: 'Mensagem enviada, mas houve erro ao atualizar o status do lead.' }
+    }
+
+    // 4. Trigger n8n async
+    const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/simulated-lead-message'
+
+    // Fire and forget
+    fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            lead_id: leadId,
+            message_id: newMessage.id,
+            user_id: user.id
+        })
+    }).catch((err) => {
+        console.error("n8n Trigger HTTP Error (Captured silently):", err)
+    })
+
+    revalidatePath(`/leads/${leadId}`)
+    return { success: true }
+}

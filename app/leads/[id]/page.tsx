@@ -1,6 +1,7 @@
 import { getLeadDetails, getLeadMessages } from './actions'
 import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
+import MessageInput from './_components/MessageInput'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -93,8 +94,9 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
                     </div>
 
                     {/* Right Column: Message Timeline */}
-                    <div className="lg:col-span-8">
+                    <div className="lg:col-span-8 flex flex-col h-[calc(100vh-8rem)]">
                         <MessageTimeline messages={messages} />
+                        <MessageInput leadId={leadId} />
                     </div>
 
                 </div>

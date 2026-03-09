@@ -2,6 +2,8 @@ import { logout } from './login/actions'
 import { createClient } from '@/lib/supabase-server'
 import LeadDashboard from '@/components/LeadDashboard'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = await createClient()
 

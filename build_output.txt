@@ -1,0 +1,55 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ÔÜá The "midd   
+ le...leware-to-pro    
+xy:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 10.9s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/5) ...
+  Generating static pages using 7 workers (1/5) 
+  Generating static pages using 7 workers (2/5) 
+  Generating static pages using 7 workers (3/5) 
+Ô£ô Generating static pages using 7 workers (5/5) in 331.4ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî ãÆ /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /leads/[id]
+Ôö£ ãÆ /login
+Ôö£ ãÆ /settings
+Ôöö Ôùï /simular-lead
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

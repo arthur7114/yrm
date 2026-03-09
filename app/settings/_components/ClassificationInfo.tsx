@@ -1,4 +1,4 @@
-import { FireIcon, SparklesIcon, SnowflakeIcon } from 'lucide-react'
+import { Flame, SparklesIcon, SnowflakeIcon } from 'lucide-react'
 
 export default function ClassificationInfo() {
     return (
@@ -47,11 +47,11 @@ export default function ClassificationInfo() {
                 {/* Quente */}
                 <div className="rounded-lg border border-red-100 bg-red-50 p-4 relative overflow-hidden group hover:shadow-md transition-all">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <FireIcon className="h-16 w-16 text-red-600" />
+                        <Flame className="h-16 w-16 text-red-600" />
                     </div>
                     <div className="flex items-center space-x-2 mb-3">
                         <div className="bg-red-100 p-2 rounded-md">
-                            <FireIcon className="h-5 w-5 text-red-700" />
+                            <Flame className="h-5 w-5 text-red-700" />
                         </div>
                         <h3 className="text-lg font-semibold text-red-900">Lead Quente</h3>
                     </div>

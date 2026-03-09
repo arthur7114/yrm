@@ -4,6 +4,8 @@ import ClassificationInfo from './_components/ClassificationInfo'
 import QuestionsManager from './_components/QuestionsManager'
 import { redirect } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
     title: 'Configurações de Contexto - Lead System',
     description: 'Defina o contexto estratégico do negócio para a IA.',

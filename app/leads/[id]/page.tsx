@@ -4,6 +4,8 @@ import MessageTimeline from './_components/MessageTimeline'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
     title: 'Detalhes do Lead - Lead System',
     description: 'Histórico de mensagens e estado atual do lead.',

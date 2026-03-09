@@ -10,7 +10,7 @@ import {
 } from '../actions'
 // @ts-ignore
 import { useFormStatus } from 'react-dom'
-import { GripVerticalIcon, PlusIcon, Trash2Icon, PencilIcon, CheckIcon, XIcon, PowerIcon, PowerOffIcon } from 'lucide-react'
+import { GripVerticalIcon, PlusIcon, Trash2Icon, PencilIcon, CheckIcon, X, PowerIcon, PowerOffIcon } from 'lucide-react'
 
 // Simple drag and drop using HTML5 native APIs for simplicity
 // For production, libraries like dnd-kit are better but this keeps it clean.
@@ -82,8 +82,9 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
         setDraggedIdx(index)
         e.dataTransfer.effectAllowed = 'move'
         // Subtle opacity to dragged item
-        if (e.target instanceof HTMLElement) {
-            setTimeout(() => e.target.classList.add('opacity-50'), 0)
+        const target = e.target as HTMLElement
+        if (target instanceof HTMLElement) {
+            setTimeout(() => target.classList.add('opacity-50'), 0)
         }
     }
 
@@ -189,7 +190,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
                                                 <CheckIcon className="h-5 w-5" />
                                             </button>
                                             <button type="button" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 p-1">
-                                                <XIcon className="h-5 w-5" />
+                                                <X className="h-5 w-5" />
                                             </button>
                                         </div>
                                     ) : (

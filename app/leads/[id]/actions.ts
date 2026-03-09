@@ -18,6 +18,7 @@ export interface LeadMessage {
     lead_id: number
     message_content: string
     sender_type: 'lead' | 'system' | 'human'
+    user_feedback?: 'positive' | 'negative' | null
     created_at: string
 }
 

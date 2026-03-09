@@ -30,14 +30,14 @@ oteException
   andError
  
   Creating an optimized production build ...
-Ô£ô Compiled successfully in 16.3s
+Ô£ô Compiled successfully in 15.5s
   Running TypeScript ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/5) ...
   Generating static pages using 7 workers (1/5) 
   Generating static pages using 7 workers (2/5) 
   Generating static pages using 7 workers (3/5) 
-Ô£ô Generating static pages using 7 workers (5/5) in 384.0ms
+Ô£ô Generating static pages using 7 workers (5/5) in 287.7ms
   Finalizing page optimization ...
 
 Route (app)

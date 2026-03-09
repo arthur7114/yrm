@@ -124,11 +124,10 @@ CRITÉRIOS DE CLASSIFICAÇÃO OBRIGATÓRIOS:
 'quente': Decisão tomada ou orçamento aprovado. Tem urgência e só precisa de detalhes logísticos para iniciar o projeto ou assinar contrato.
 
 REGRAS RÍGIDAS DE SAÍDA:
-Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown (\`\`\`json), contendo ESPECIFICAMENTE as 3 chaves a seguir:
+Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown (\`\`\`json), contendo ESPECIFICAMENTE as 2 chaves a seguir:
 {
   "classification": "frio" ou "morno" ou "quente",
-  "confidence_reason": "Um parágrafo curto, direto e sem jargões explicando exatamente o por quê tomou essa decisão.",
-  "initial_response": "Uma resposta natural, amigável respeitando o Tom de Comunicação e sem jargões. AVISO IMPORTANTE: Não faça nenhuma pergunta adicional nesta resposta."
+  "confidence_reason": "Um parágrafo curto, direto e sem jargões explicando exatamente o por quê tomou essa decisão."
 }`
 
         const userPrompt = `Abaixo está o histórico da conversa com o lead. Leia, analise as intenções nas entrelinhas e classifique.\n\n### HISTÓRICO DA CONVERSA ###\n${historyText}`
@@ -172,8 +171,8 @@ Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown
             if (!['frio', 'morno', 'quente'].includes(resultObj.classification?.toLowerCase())) {
                 throw new Error("Invalid classification string returned by AI.")
             }
-            if (!resultObj.confidence_reason || !resultObj.initial_response) {
-                throw new Error("Missing required keys returned by AI.")
+            if (!resultObj.confidence_reason) {
+                throw new Error("Missing confidence_reason key returned by AI.")
             }
         } catch (parseError) {
             console.error("Failed to parse AI response.", rawContent, parseError)
@@ -182,7 +181,6 @@ Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown
 
         const classificationStr = resultObj.classification.toLowerCase()
         const reasonStr = resultObj.confidence_reason
-        const responseStr = resultObj.initial_response
 
         // 7. Persist Results (Transaction-like steps)
 
@@ -206,19 +204,6 @@ Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown
                 classification: classificationStr,
                 confidence_reason: reasonStr
             })
-
-        if (insertQualError) throw insertQualError
-
-        // 7.c Insert Initial Response as System Message
-        const { error: insertMsgError } = await supabase
-            .from('messages')
-            .insert({
-                lead_id: leadId,
-                message_content: responseStr,
-                sender_type: 'system'
-            })
-
-        if (insertMsgError) throw insertMsgError
 
         // Success!
         revalidatePath(`/leads/${leadId}`)
@@ -251,3 +236,134 @@ export async function saveQualificationFeedback(qualificationId: number, feedbac
     // However, we don't know the leadId. Since Server Actions execute safely, the client will get the true/false response anyway.
     return { success: true }
 }
+
+export async function generateInitialResponseViaAI(leadId: number): Promise<AIQualificationResponse> {
+    const { supabase, user } = await getAuthClient()
+    if (!user) return { success: false, message: 'Não autenticado' }
+
+    try {
+        // 1. Validate Lead Status
+        const { data: lead } = await supabase
+            .from('leads')
+            .select('current_status, current_classification')
+            .eq('id', leadId)
+            .eq('user_id', user.id)
+            .single()
+
+        if (!lead || lead.current_status !== 'classificado') {
+            return { success: false, message: 'Lead precisa ser classificado antes de gerar resposta.' }
+        }
+
+        // 2. Prevent Duplicate Responses
+        const { data: existingSysMsgs } = await supabase
+            .from('messages')
+            .select('id')
+            .eq('lead_id', leadId)
+            .eq('sender_type', 'system')
+            .limit(1)
+
+        if (existingSysMsgs && existingSysMsgs.length > 0) {
+            return { success: false, message: 'Uma resposta inicial já foi enviada para este lead.' }
+        }
+
+        // 3. Fetch Contexts
+        const { data: bContext } = await supabase
+            .from('business_context')
+            .select('*')
+            .eq('user_id', user.id)
+            .single()
+
+        const { data: qualification } = await supabase
+            .from('lead_qualifications')
+            .select('confidence_reason')
+            .eq('lead_id', leadId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+        // 4. Build Prompt
+        const systemPrompt = `Você é um Gerador Automático de Resposta Inicial atuando como representante do negócio.
+
+CONTEXTO DO NEGÓCIO:
+- Nome: ${bContext?.business_name || 'Nosso Negócio'}
+- Tom de Comunicação: ${bContext?.communication_tone || 'Profissional e acolhedor'}
+- Objetivo Principal do Atendimento: ${bContext?.service_objective || 'Fazer o primeiro contato.'}
+
+O LEAD FOI CLASSIFICADO COMO: '${lead.current_classification.toUpperCase()}'
+MOTIVO DA CLASSIFICAÇÃO: ${qualification?.confidence_reason || 'Nenhum motivo específico registrado.'}
+
+SUA TAREFA:
+Crie UMA ÚNICA mensagem de resposta inicial para enviar diretamente ao lead.
+A mensagem deve ser redigida NA PRIMEIRA PESSOA DO SINGULAR (como se fosse um humano ou representante dedicado enviando).
+
+REGRAS RÍGIDAS (SE QUEBRAR VOCÊ FALHOU):
+1. DEVE ser curta, direta e alinhada ao "Tom de Comunicação" e responder ao "MOTIVO" da classificação de forma empática.
+2. NÃO faça nenhuma pergunta adicional ao lead.
+3. NÃO prometa nada fora do seu alcance (prazos fixos, valores não orçados).
+4. Diga apenas que você recebeu as informações, explique o que vai acontecer em seguida (ex: "Entendi perfeitamente sua necessidade sobre [assunto]. Um de nossos especialistas vai analisar os detalhes e entrar em contato com você em breve.") e pronto.
+5. NÃO CONTINUAR CONVERSA. O objetivo não é bater papo, é organizar o jogo e preparar o terreno para o humano.
+6. RETORNE EXCLUSIVAMENTE A MENSAGEM FINAL. Sem aspas iniciais, sem introdução, sem marcadores. Apenas o texto puro que o usuário leria no WhatsApp/Email.`
+
+        const apiKey = process.env.OPENAI_API_KEY
+        if (!apiKey || !apiKey.startsWith('sk-')) {
+            return { success: false, message: 'Chave OpenAI inválida.' }
+        }
+
+        const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'system', content: systemPrompt }],
+                temperature: 0.3
+            })
+        })
+
+        if (!openAiRes.ok) {
+            console.error("OpenAI Error:", await openAiRes.text())
+            return { success: false, message: 'Falha técnica ao contatar a inteligência artificial (OpenAI).' }
+        }
+
+        const openAiData = await openAiRes.json()
+        const generatedResponse = openAiData.choices[0].message.content.trim()
+
+        if (!generatedResponse) {
+            return { success: false, message: 'A IA gerou uma resposta vazia. Tente novamente.' }
+        }
+
+        // 5. Persist Response
+        const { error: insertMsgError } = await supabase
+            .from('messages')
+            .insert({
+                lead_id: leadId,
+                message_content: generatedResponse,
+                sender_type: 'system'
+            })
+
+        if (insertMsgError) throw insertMsgError
+
+        revalidatePath(`/leads/${leadId}`)
+        return { success: true }
+    } catch (err: any) {
+        console.error("generateInitialResponseViaAI Exception:", err)
+        return { success: false, message: 'Ocorreu um erro interno durante a geração da resposta. Tente novamente mais tarde.' }
+    }
+}
+
+export async function saveResponseFeedback(messageId: number, feedback: 'positive' | 'negative'): Promise<AIQualificationResponse> {
+    const { supabase, user } = await getAuthClient()
+    if (!user) return { success: false, message: 'Não autenticado' }
+
+    const { error } = await supabase
+        .from('messages')
+        .update({ user_feedback: feedback })
+        .eq('id', messageId)
+
+    if (error) {
+        console.error("Feedback error:", error)
+        return { success: false, message: 'Falha ao salvar feedback na mensagem.' }
+    }
+
+    return { success: true }
+}
+

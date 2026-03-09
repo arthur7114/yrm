@@ -1,7 +1,18 @@
+'use client'
+
 import { LeadMessage } from '../actions'
-import { BotIcon, UserCircleIcon, UserIcon } from 'lucide-react'
+import { BotIcon, UserCircleIcon, UserIcon, ThumbsUpIcon, ThumbsDownIcon, SparklesIcon } from 'lucide-react'
+import { saveResponseFeedback } from '../ai-actions'
+import { useState } from 'react'
 
 export default function MessageTimeline({ messages }: { messages: LeadMessage[] }) {
+    // Local state to track optimistic feedback updates so we don't need to refresh the whole page
+    const [optimisticFeedback, setOptimisticFeedback] = useState<Record<number, 'positive' | 'negative' | null>>({})
+
+    const handleFeedback = async (msgId: number, type: 'positive' | 'negative') => {
+        setOptimisticFeedback(prev => ({ ...prev, [msgId]: type }))
+        await saveResponseFeedback(msgId, type)
+    }
 
     if (!messages || messages.length === 0) {
         return (
@@ -58,6 +69,11 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
 
                                     {/* Bubble */}
                                     <div className="flex flex-col">
+                                        {isSystem && (
+                                            <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded-full border border-indigo-100">
+                                                <SparklesIcon className="w-3 h-3" /> Resposta automática gerada por IA
+                                            </div>
+                                        )}
                                         <div className={`px-4 py-3 rounded-2xl ${isSystem ? 'bg-indigo-600 text-white rounded-br-sm shadow-md' : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-sm'}`}>
                                             <p className="text-[15px] whitespace-pre-wrap break-words leading-relaxed">
                                                 {msg.message_content}
@@ -66,6 +82,30 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
                                         <div className={`text-[11px] text-gray-400 mt-1 flex ${isSystem ? 'justify-end' : 'justify-start'}`}>
                                             {showTime} • {isSystem ? 'Sistema' : 'Lead'}
                                         </div>
+
+                                        {/* AI Feedback Form */}
+                                        {isSystem && (
+                                            <div className="mt-2 flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleFeedback(msg.id, 'positive')}
+                                                    className={`p-1.5 rounded border transition-colors ${(optimisticFeedback[msg.id] || msg.user_feedback) === 'positive'
+                                                            ? 'bg-green-50 text-green-600 border-green-200'
+                                                            : 'bg-white text-gray-400 hover:text-green-500 hover:bg-gray-50 border-gray-200'
+                                                        }`}
+                                                >
+                                                    <ThumbsUpIcon className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleFeedback(msg.id, 'negative')}
+                                                    className={`p-1.5 rounded border transition-colors ${(optimisticFeedback[msg.id] || msg.user_feedback) === 'negative'
+                                                            ? 'bg-red-50 text-red-600 border-red-200'
+                                                            : 'bg-white text-gray-400 hover:text-red-500 hover:bg-gray-50 border-gray-200'
+                                                        }`}
+                                                >
+                                                    <ThumbsDownIcon className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
 
                                 </div>

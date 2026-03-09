@@ -3,6 +3,7 @@ import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
 import MessageInput from './_components/MessageInput'
 import SimulateAIAction from './_components/SimulateAIAction'
+import SimulateResponseAction from './_components/SimulateResponseAction'
 import QualificationResultBlock from './_components/QualificationResultBlock'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -102,6 +103,10 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
 
                         {lead.current_status === 'em_processamento' && (
                             <SimulateAIAction leadId={lead.id} />
+                        )}
+
+                        {lead.current_status === 'classificado' && messages.filter(m => m.sender_type === 'system').length === 0 && (
+                            <SimulateResponseAction leadId={lead.id} />
                         )}
                     </div>
 

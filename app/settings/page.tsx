@@ -28,29 +28,14 @@ export default async function SettingsPage() {
     const questions = questionsRes.data || []
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-
-            {/* Simple Top Nav for Settings */}
-            <nav className="bg-white shadow-sm sticky top-0 z-20">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex items-center space-x-4">
-                            <a href="/" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
-                                &larr; Voltar ao Dashboard
-                            </a>
-                            <span className="text-gray-300">|</span>
-                            <span className="font-bold text-xl text-gray-900">Configurações Estratégicas</span>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className="min-h-screen flex flex-col">
 
             {/* Main Content */}
             <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
                 <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Estratégia do Negócio</h1>
-                    <p className="mt-2 text-base text-gray-600 max-w-3xl">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Estratégia do Negócio</h1>
+                    <p className="mt-2 text-base text-gray-600 dark:text-gray-400 max-w-3xl">
                         Estas configurações definem como a Inteligência Artificial entende a sua empresa, como ela qualifica os leads que chegam e qual será o tom da conversa. Preencha com cuidado, pois isso impacta diretamente nas taxas de conversão.
                     </p>
                 </header>

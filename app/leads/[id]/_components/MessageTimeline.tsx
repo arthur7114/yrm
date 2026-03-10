@@ -1,7 +1,7 @@
 'use client'
 
 import { LeadMessage } from '../actions'
-import { BotIcon, UserCircleIcon, UserIcon, ThumbsUpIcon, ThumbsDownIcon, SparklesIcon } from 'lucide-react'
+import { BotIcon, UserCircleIcon, UserIcon, ThumbsUpIcon, ThumbsDownIcon, SparklesIcon, Cog } from 'lucide-react'
 import { saveResponseFeedback } from '../ai-actions'
 import { useState } from 'react'
 
@@ -39,6 +39,8 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50">
                 {messages.map((msg, idx) => {
                     const isSystem = msg.sender_type === 'system'
+                    const isAutomation = msg.sender_type === 'automacao' || msg.is_automation === true
+                    const isBot = isSystem || isAutomation
                     const showTime = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
                     const showDate = new Date(msg.created_at).toLocaleDateString('pt-BR')
 
@@ -57,40 +59,45 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
                                 </div>
                             )}
 
-                            <div className={`flex w-full ${isSystem ? 'justify-end' : 'justify-start'} mb-2`}>
-                                <div className={`flex max-w-[80%] ${isSystem ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <div className={`flex w-full ${isBot ? 'justify-end' : 'justify-start'} mb-2`}>
+                                <div className={`flex max-w-[80%] ${isBot ? 'flex-row-reverse' : 'flex-row'}`}>
 
                                     {/* Avatar */}
-                                    <div className={`flex-shrink-0 flex items-end ${isSystem ? 'ml-3' : 'mr-3'}`}>
-                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isSystem ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-200 text-gray-600'}`}>
-                                            {isSystem ? <BotIcon size={18} /> : <UserIcon size={18} />}
+                                    <div className={`flex-shrink-0 flex items-end ${isBot ? 'ml-3' : 'mr-3'}`}>
+                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isAutomation ? 'bg-gray-100 text-gray-500' : isSystem ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-200 text-gray-600'}`}>
+                                            {isAutomation ? <Cog size={18} /> : isSystem ? <BotIcon size={18} /> : <UserIcon size={18} />}
                                         </div>
                                     </div>
 
                                     {/* Bubble */}
                                     <div className="flex flex-col">
-                                        {isSystem && (
+                                        {isAutomation && (
+                                            <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 w-fit px-2 py-0.5 rounded-full border border-gray-200">
+                                                <Cog className="w-3 h-3" /> automação
+                                            </div>
+                                        )}
+                                        {isSystem && !isAutomation && (
                                             <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded-full border border-indigo-100">
                                                 <SparklesIcon className="w-3 h-3" /> Resposta automática gerada por IA
                                             </div>
                                         )}
-                                        <div className={`px-4 py-3 rounded-2xl ${isSystem ? 'bg-indigo-600 text-white rounded-br-sm shadow-md' : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-sm'}`}>
+                                        <div className={`px-4 py-3 rounded-2xl ${isAutomation ? 'bg-gray-200 text-gray-800 rounded-br-sm shadow-sm' : isSystem ? 'bg-indigo-600 text-white rounded-br-sm shadow-md' : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-sm'}`}>
                                             <p className="text-[15px] whitespace-pre-wrap break-words leading-relaxed">
                                                 {msg.message_content}
                                             </p>
                                         </div>
-                                        <div className={`text-[11px] text-gray-400 mt-1 flex ${isSystem ? 'justify-end' : 'justify-start'}`}>
-                                            {showTime} • {isSystem ? 'Sistema' : 'Lead'}
+                                        <div className={`text-[11px] text-gray-400 mt-1 flex ${isBot ? 'justify-end' : 'justify-start'}`}>
+                                            {showTime} • {isAutomation ? 'Automação' : isSystem ? 'Sistema' : 'Lead'}
                                         </div>
 
                                         {/* AI Feedback Form */}
-                                        {isSystem && (
+                                        {isBot && (
                                             <div className="mt-2 flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleFeedback(msg.id, 'positive')}
                                                     className={`p-1.5 rounded border transition-colors ${(optimisticFeedback[msg.id] || msg.user_feedback) === 'positive'
-                                                            ? 'bg-green-50 text-green-600 border-green-200'
-                                                            : 'bg-white text-gray-400 hover:text-green-500 hover:bg-gray-50 border-gray-200'
+                                                        ? 'bg-green-50 text-green-600 border-green-200'
+                                                        : 'bg-white text-gray-400 hover:text-green-500 hover:bg-gray-50 border-gray-200'
                                                         }`}
                                                 >
                                                     <ThumbsUpIcon className="w-3.5 h-3.5" />
@@ -98,8 +105,8 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
                                                 <button
                                                     onClick={() => handleFeedback(msg.id, 'negative')}
                                                     className={`p-1.5 rounded border transition-colors ${(optimisticFeedback[msg.id] || msg.user_feedback) === 'negative'
-                                                            ? 'bg-red-50 text-red-600 border-red-200'
-                                                            : 'bg-white text-gray-400 hover:text-red-500 hover:bg-gray-50 border-gray-200'
+                                                        ? 'bg-red-50 text-red-600 border-red-200'
+                                                        : 'bg-white text-gray-400 hover:text-red-500 hover:bg-gray-50 border-gray-200'
                                                         }`}
                                                 >
                                                     <ThumbsDownIcon className="w-3.5 h-3.5" />

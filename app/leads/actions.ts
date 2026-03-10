@@ -1,8 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase-server'
 
 export type CreateLeadState = {
     success?: boolean
@@ -15,56 +14,14 @@ export type CreateLeadState = {
 }
 
 export async function createLead(prevState: CreateLeadState, formData: FormData): Promise<CreateLeadState> {
-    // 1. Initialize Supabase Client (Manual Mode)
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false,
-            }
-        }
-    )
+    const supabase = await createClient()
 
-    // 2. Authenticate User (Manual Cookie Parsing)
-    const cookieStore = await cookies()
-    let user = null;
+    const {
+        data: { user },
+        error: authError
+    } = await supabase.auth.getUser()
 
-    try {
-        const allCookies = cookieStore.getAll()
-        const authCookie = allCookies.find(c => c.name.endsWith('-auth-token')) // Matches sb-<ref>-auth-token
-
-        if (authCookie) {
-            // Attempt to parse standard SSR cookie format: ["access_token", "refresh_token"]
-            // If parsing fails, it might be a raw string or different format.
-            let accessToken = null;
-            try {
-                const tokens = JSON.parse(authCookie.value);
-                if (Array.isArray(tokens) && tokens.length > 0) {
-                    accessToken = tokens[0];
-                } else if (typeof tokens === 'object' && tokens.access_token) {
-                    accessToken = tokens.access_token; // Old or different format support
-                }
-            } catch (e) {
-                // Fallback: maybe it's just the token string? Unlikely for SSR but possible.
-                accessToken = authCookie.value;
-            }
-
-            if (accessToken) {
-                const { data } = await supabase.auth.getUser(accessToken)
-                user = data.user
-            }
-        }
-    } catch (err) {
-        console.error("Auth parsing error:", err);
-    }
-
-    // Fallback for debugging/development if cookie parsing strictly fails but we are in a trusted dev mode?
-    // No, we must be secure. If no user, we return error.
-
-    if (!user) {
+    if (!user || authError) {
         return {
             success: false,
             message: 'Usuário não autenticado ou sessão expirada.',
@@ -122,7 +79,7 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
         lead_name: name || null,
         phone_number: phone || null,
         current_status: 'aguardando_classificacao',
-        current_classification: null,
+        current_classification: 'frio', // Default required by DB constraint
     })
 
     if (error) {

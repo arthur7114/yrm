@@ -1,10 +1,16 @@
-import { getLeadDetails, getLeadMessages, getLeadQualification } from './actions'
+import { getLeadDetails, getLeadMessages, getLeadQualification, getClassificationEvents, getHandoffContext } from './actions'
 import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
 import MessageInput from './_components/MessageInput'
 import SimulateAIAction from './_components/SimulateAIAction'
 import SimulateResponseAction from './_components/SimulateResponseAction'
 import QualificationResultBlock from './_components/QualificationResultBlock'
+import ClassificationChangeBadge from './_components/ClassificationChangeBadge'
+import ClassificationHistory from './_components/ClassificationHistory'
+import HandoffButton from './_components/HandoffButton'
+import HandoffContextBlock from './_components/HandoffContextBlock'
+import EditLeadDialog from './_components/EditLeadDialog'
+import DeleteLeadDialog from './_components/DeleteLeadDialog'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -17,7 +23,6 @@ export const metadata = {
 
 export default async function LeadDetailsPage({ params }: { params: Promise<{ id: string }> }) {
 
-    // Await params as required by Next.js 15+ 
     const resolvedParams = await params
     const leadId = parseInt(resolvedParams.id, 10)
 
@@ -32,10 +37,12 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
     }
 
     // Fetch data concurrently
-    const [leadRes, messagesRes, qualRes] = await Promise.all([
+    const [leadRes, messagesRes, qualRes, eventsRes, handoffRes] = await Promise.all([
         getLeadDetails(leadId),
         getLeadMessages(leadId),
-        getLeadQualification(leadId)
+        getLeadQualification(leadId),
+        getClassificationEvents(leadId),
+        getHandoffContext(leadId)
     ])
 
     // Handle Unauthenticated
@@ -68,6 +75,19 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
     const lead = leadRes.data
     const messages = messagesRes.data || []
     const qualification = qualRes?.data || null
+    const classificationEvents = eventsRes?.data || []
+    const latestEvent = classificationEvents.length > 0 ? classificationEvents[0] : null
+    const handoffContext = handoffRes?.data || null
+
+    const isHandedOff = lead.current_status === 'encaminhado_humano'
+
+    // Extract data for handoff context block
+    const lastLeadMessage = isHandedOff
+        ? [...messages].reverse().find(m => m.sender_type === 'lead')?.message_content || null
+        : null
+    const systemResponse = isHandedOff
+        ? messages.find(m => m.sender_type === 'system')?.message_content || null
+        : null
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -95,19 +115,55 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
 
                     {/* Left Column: Lead Summary (Static Context) */}
                     <div className="lg:col-span-4 h-full flex flex-col gap-6">
-                        {lead.current_status === 'classificado' && qualification && (
+
+                        {/* Handoff Context — visible ONLY after handoff */}
+                        {isHandedOff && handoffContext && (
+                            <HandoffContextBlock
+                                handoff={handoffContext}
+                                qualification={qualification}
+                                lastLeadMessage={lastLeadMessage}
+                                systemResponse={systemResponse}
+                            />
+                        )}
+
+                        {/* Classification Change Badge */}
+                        {!isHandedOff && (
+                            <ClassificationChangeBadge latestEvent={latestEvent} />
+                        )}
+
+                        {/* Qualification Result — only when classified, not handed off */}
+                        {!isHandedOff && lead.current_status === 'classificado' && qualification && (
                             <QualificationResultBlock result={qualification} />
                         )}
 
                         <LeadSummaryCard lead={lead} />
 
-                        {lead.current_status === 'em_processamento' && (
+                        {/* Edit / Delete Actions */}
+                        <div className="flex flex-col gap-3">
+                            <EditLeadDialog
+                                leadId={lead.id}
+                                currentName={lead.lead_name || ''}
+                                currentPhone={lead.phone_number || ''}
+                            />
+                            <DeleteLeadDialog leadId={lead.id} />
+                        </div>
+
+                        {/* Handoff Button — only when classified, not handed off */}
+                        {lead.current_status === 'classificado' && (
+                            <HandoffButton leadId={lead.id} />
+                        )}
+
+                        {/* Automation actions — NEVER shown after handoff */}
+                        {!isHandedOff && lead.current_status === 'em_processamento' && (
                             <SimulateAIAction leadId={lead.id} />
                         )}
 
-                        {lead.current_status === 'classificado' && messages.filter(m => m.sender_type === 'system').length === 0 && (
+                        {!isHandedOff && lead.current_status === 'classificado' && messages.filter(m => m.sender_type === 'system').length === 0 && (
                             <SimulateResponseAction leadId={lead.id} />
                         )}
+
+                        {/* Classification History */}
+                        <ClassificationHistory events={classificationEvents} />
                     </div>
 
                     {/* Right Column: Message Timeline */}

@@ -1,8 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase-server'
 
 // Types
 export interface BusinessContext {
@@ -30,48 +29,14 @@ export type ActionState<T = any> = {
 
 // Internal Helper for Auth Client
 async function getAuthClient() {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false,
-            }
-        }
-    )
+    const supabase = await createClient()
 
-    const cookieStore = await cookies()
-    let user = null;
+    const {
+        data: { user },
+        error: authError
+    } = await supabase.auth.getUser()
 
-    try {
-        const allCookies = cookieStore.getAll()
-        const authCookie = allCookies.find(c => c.name.endsWith('-auth-token'))
-
-        if (authCookie) {
-            let accessToken = null;
-            try {
-                const tokens = JSON.parse(authCookie.value);
-                if (Array.isArray(tokens) && tokens.length > 0) {
-                    accessToken = tokens[0];
-                } else if (typeof tokens === 'object' && tokens.access_token) {
-                    accessToken = tokens.access_token;
-                }
-            } catch (e) {
-                accessToken = authCookie.value;
-            }
-
-            if (accessToken) {
-                const { data } = await supabase.auth.getUser(accessToken)
-                user = data.user
-            }
-        }
-    } catch (err) {
-        console.error("Auth parsing error:", err);
-    }
-    
-    return { supabase, user }
+    return { supabase, user: authError ? null : user }
 }
 
 
@@ -161,7 +126,7 @@ export async function createQualificationQuestion(prevState: any, formData: Form
     if (!user) return { success: false, message: 'Sessão expirada. Faça login novamente.' }
 
     const question_text = formData.get('question_text') as string
-    
+
     if (!question_text?.trim()) {
         return { success: false, message: 'O texto da pergunta não pode estar vazio.' }
     }
@@ -221,7 +186,7 @@ export async function updateQuestionOrdering(orderedIds: string[]): Promise<Acti
 
     // Update each question's order in parallel
     // Ideally this could be an RPC or bulk update, but for small arrays it's fine.
-    const updates = orderedIds.map((id, index) => 
+    const updates = orderedIds.map((id, index) =>
         supabase
             .from('qualification_questions')
             .update({ order_index: index })

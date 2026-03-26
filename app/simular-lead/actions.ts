@@ -88,12 +88,29 @@ export async function submitLeadSimulation(prevState: FormState, formData: FormD
             .insert({
                 lead_id: leadId,
                 sender_type: 'lead',
+                message_direction: 'inbound',
+                content_type: 'text',
+                metadata: {
+                    source: 'simulation'
+                },
                 message_content: message
             })
 
         if (messageError) {
             console.error('Error creating message:', messageError)
             throw new Error('Erro ao salvar mensagem')
+        }
+
+        const { error: leadUpdateError } = await supabase
+            .from('leads')
+            .update({
+                last_message_at: new Date().toISOString(),
+                last_message_preview: message.slice(0, 140)
+            })
+            .eq('id', leadId)
+
+        if (leadUpdateError) {
+            console.error('Error updating lead activity:', leadUpdateError)
         }
 
         return {

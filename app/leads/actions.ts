@@ -24,11 +24,10 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
     if (!user || authError) {
         return {
             success: false,
-            message: 'Usuário não autenticado ou sessão expirada.',
+            message: 'Usuário não autenticado.',
         }
     }
 
-    // 3. Validation
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
     const lgpdConsent = formData.get('lgpd') === 'on'
@@ -53,7 +52,6 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
         }
     }
 
-    // 4. Check for Duplicates
     let query = supabase.from('leads').select('id').eq('user_id', user.id)
 
     const orConditions = []
@@ -61,7 +59,6 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
     if (name) orConditions.push(`lead_name.eq.${name}`)
 
     if (orConditions.length > 0) {
-        // Note: 'or' syntax in supabase-js might need the filter string format or method chaining
         query = query.or(orConditions.join(','))
         const { data: existingLeads } = await query
 
@@ -73,17 +70,15 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
         }
     }
 
-    // 5. Insert Lead
     const { error } = await supabase.from('leads').insert({
         user_id: user.id,
         lead_name: name || null,
         phone_number: phone || null,
         current_status: 'aguardando_classificacao',
-        current_classification: 'frio', // Default required by DB constraint
+        current_classification: 'frio',
     })
 
     if (error) {
-        console.error("Insert error:", error);
         return {
             success: false,
             message: 'Erro ao salvar lead no banco de dados. Tente novamente.',

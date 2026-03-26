@@ -1,18 +1,19 @@
-import { getLeadDetails, getLeadMessages, getLeadQualification, getClassificationEvents, getHandoffContext } from './actions'
-import LeadSummaryCard from './_components/LeadSummaryCard'
-import MessageTimeline from './_components/MessageTimeline'
-import MessageInput from './_components/MessageInput'
-import SimulateAIAction from './_components/SimulateAIAction'
-import SimulateResponseAction from './_components/SimulateResponseAction'
-import QualificationResultBlock from './_components/QualificationResultBlock'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+
 import ClassificationChangeBadge from './_components/ClassificationChangeBadge'
 import ClassificationHistory from './_components/ClassificationHistory'
+import DeleteLeadDialog from './_components/DeleteLeadDialog'
+import EditLeadDialog from './_components/EditLeadDialog'
 import HandoffButton from './_components/HandoffButton'
 import HandoffContextBlock from './_components/HandoffContextBlock'
-import EditLeadDialog from './_components/EditLeadDialog'
-import DeleteLeadDialog from './_components/DeleteLeadDialog'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import LeadSummaryCard from './_components/LeadSummaryCard'
+import MessageInput from './_components/MessageInput'
+import MessageTimeline from './_components/MessageTimeline'
+import QualificationResultBlock from './_components/QualificationResultBlock'
+import SimulateAIAction from './_components/SimulateAIAction'
+import SimulateResponseAction from './_components/SimulateResponseAction'
+import { getClassificationEvents, getHandoffContext, getLeadDetails, getLeadMessages, getLeadQualification } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,21 +23,19 @@ export const metadata = {
 }
 
 export default async function LeadDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-
     const resolvedParams = await params
     const leadId = parseInt(resolvedParams.id, 10)
 
     if (isNaN(leadId)) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+            <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
                 <h1 className="text-2xl font-bold text-gray-900">ID Inválido</h1>
-                <p className="text-gray-500 mt-2">O identificador do lead não é válido.</p>
-                <Link href="/" className="mt-6 text-indigo-600 hover:text-indigo-800 font-medium">&larr; Voltar para a Home</Link>
+                <p className="mt-2 text-gray-500">O identificador do lead não é válido.</p>
+                <Link href="/" className="mt-6 font-medium text-indigo-600 hover:text-indigo-800">&larr; Voltar para a Home</Link>
             </div>
         )
     }
 
-    // Fetch data concurrently
     const [leadRes, messagesRes, qualRes, eventsRes, handoffRes] = await Promise.all([
         getLeadDetails(leadId),
         getLeadMessages(leadId),
@@ -45,26 +44,24 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
         getHandoffContext(leadId)
     ])
 
-    // Handle Unauthenticated
     if (leadRes.message === 'Não autenticado') {
         redirect('/login')
     }
 
-    // Handle Not Found / Unauthorized
     if (!leadRes.success || !leadRes.data) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 text-center max-w-md w-full">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+                <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                         <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
-                    <h1 className="text-xl font-bold text-gray-900 mb-2">Lead Não Encontrado</h1>
-                    <p className="text-gray-500 text-sm mb-6">
+                    <h1 className="mb-2 text-xl font-bold text-gray-900">Lead Não Encontrado</h1>
+                    <p className="mb-6 text-sm text-gray-500">
                         {leadRes.message || 'Este lead não existe ou você não tem permissão para visualizá-lo.'}
                     </p>
-                    <Link href="/" className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 w-full">
+                    <Link href="/" className="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                         Voltar para o Dashboard
                     </Link>
                 </div>
@@ -81,27 +78,24 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
 
     const isHandedOff = lead.current_status === 'encaminhado_humano'
 
-    // Extract data for handoff context block
     const lastLeadMessage = isHandedOff
-        ? [...messages].reverse().find(m => m.sender_type === 'lead')?.message_content || null
+        ? [...messages].reverse().find((message) => message.sender_type === 'lead')?.message_content || null
         : null
     const systemResponse = isHandedOff
-        ? messages.find(m => m.sender_type === 'system')?.message_content || null
+        ? messages.find((message) => message.sender_type === 'system')?.message_content || null
         : null
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-
-            {/* Simple Top Nav */}
-            <nav className="bg-white shadow-sm sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
+        <div className="flex min-h-screen flex-col bg-gray-50">
+            <nav className="sticky top-0 z-20 bg-white shadow-sm">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center space-x-4">
-                            <Link href="/" className="text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+                            <Link href="/" className="text-sm font-medium text-gray-500 transition-colors hover:text-indigo-600">
                                 &larr; Voltar
                             </Link>
                             <span className="text-gray-300">|</span>
-                            <span className="font-semibold text-lg text-gray-900 truncate max-w-[200px] sm:max-w-md">
+                            <span className="max-w-[200px] truncate text-lg font-semibold text-gray-900 sm:max-w-md">
                                 {lead.lead_name || lead.phone_number || 'Novo Lead'}
                             </span>
                         </div>
@@ -109,36 +103,26 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
                 </div>
             </nav>
 
-            {/* Main Content: 2 Columns */}
-            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-                    {/* Left Column: Lead Summary (Static Context) */}
-                    <div className="lg:col-span-4 h-full flex flex-col gap-6">
-
-                        {/* Handoff Context — visible ONLY after handoff */}
-                        {isHandedOff && handoffContext && (
+            <main className="mx-auto flex w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+                <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-12">
+                    <div className="flex h-full flex-col gap-6 lg:col-span-4">
+                        {isHandedOff && handoffContext ? (
                             <HandoffContextBlock
                                 handoff={handoffContext}
                                 qualification={qualification}
                                 lastLeadMessage={lastLeadMessage}
                                 systemResponse={systemResponse}
                             />
-                        )}
+                        ) : null}
 
-                        {/* Classification Change Badge */}
-                        {!isHandedOff && (
-                            <ClassificationChangeBadge latestEvent={latestEvent} />
-                        )}
+                        {!isHandedOff ? <ClassificationChangeBadge latestEvent={latestEvent} /> : null}
 
-                        {/* Qualification Result — only when classified, not handed off */}
-                        {!isHandedOff && lead.current_status === 'classificado' && qualification && (
+                        {!isHandedOff && lead.current_status === 'classificado' && qualification ? (
                             <QualificationResultBlock result={qualification} />
-                        )}
+                        ) : null}
 
                         <LeadSummaryCard lead={lead} />
 
-                        {/* Edit / Delete Actions */}
                         <div className="flex flex-col gap-3">
                             <EditLeadDialog
                                 leadId={lead.id}
@@ -148,30 +132,23 @@ export default async function LeadDetailsPage({ params }: { params: Promise<{ id
                             <DeleteLeadDialog leadId={lead.id} />
                         </div>
 
-                        {/* Handoff Button — only when classified, not handed off */}
-                        {lead.current_status === 'classificado' && (
-                            <HandoffButton leadId={lead.id} />
-                        )}
+                        {lead.current_status === 'classificado' ? <HandoffButton leadId={lead.id} /> : null}
 
-                        {/* Automation actions — NEVER shown after handoff */}
-                        {!isHandedOff && lead.current_status === 'em_processamento' && (
+                        {!isHandedOff && lead.current_status === 'em_processamento' ? (
                             <SimulateAIAction leadId={lead.id} />
-                        )}
+                        ) : null}
 
-                        {!isHandedOff && lead.current_status === 'classificado' && messages.filter(m => m.sender_type === 'system').length === 0 && (
+                        {!isHandedOff && lead.current_status === 'classificado' && messages.filter((message) => message.sender_type === 'system').length === 0 ? (
                             <SimulateResponseAction leadId={lead.id} />
-                        )}
+                        ) : null}
 
-                        {/* Classification History */}
                         <ClassificationHistory events={classificationEvents} />
                     </div>
 
-                    {/* Right Column: Message Timeline */}
-                    <div className="lg:col-span-8 flex flex-col h-[calc(100vh-8rem)]">
+                    <div className="flex h-[calc(100vh-8rem)] flex-col lg:col-span-8">
                         <MessageTimeline messages={messages} />
                         <MessageInput leadId={leadId} />
                     </div>
-
                 </div>
             </main>
         </div>

@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFormStatus } from 'react-dom'
 import { createLead, CreateLeadState } from '@/app/leads/actions'
-// @ts-ignore - useActionState is available in React 19 (Next.js 15+ env) but types might be lagging
 import { useActionState } from 'react'
 
 const initialState: CreateLeadState = {

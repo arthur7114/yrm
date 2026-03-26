@@ -4,14 +4,29 @@ import { useState } from 'react'
 import LeadCard from './LeadCard'
 import EmptyState from './EmptyState'
 import LeadModal from './LeadModal'
-// import { logout } from '@/app/login/actions' // Cannot import server action directly into event handler sometimes w/o bind? No, standard in Next.js is fine.
+import NotificationsPanel from './NotificationsPanel'
 
 interface LeadDashboardProps {
-    initialLeads: any[]
+    initialLeads: {
+        id: number
+        lead_name?: string | null
+        phone_number?: string | null
+        current_classification?: string | null
+        current_status?: string | null
+        created_at: string
+        last_message_at?: string | null
+        last_message_preview?: string | null
+    }[]
+    notifications: {
+        id: number
+        title: string
+        body: string | null
+        created_at: string
+    }[]
     logoutAction: () => Promise<void> // Pass server action as prop or import
 }
 
-export default function LeadDashboard({ initialLeads, logoutAction }: LeadDashboardProps) {
+export default function LeadDashboard({ initialLeads, notifications, logoutAction }: LeadDashboardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     // We rely on revalidatePath in the server action to update the list, 
@@ -57,6 +72,9 @@ export default function LeadDashboard({ initialLeads, logoutAction }: LeadDashbo
                 <main>
                     <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                         <div className="px-4 py-8 sm:px-0">
+                            <div className="mb-6">
+                                <NotificationsPanel notifications={notifications} />
+                            </div>
 
                             {initialLeads && initialLeads.length > 0 ? (
                                 <div className="space-y-4">

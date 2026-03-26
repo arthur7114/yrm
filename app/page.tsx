@@ -14,12 +14,20 @@ export default async function HomePage() {
     return null
   }
 
-  // 2. Fetch Leads
-  const { data: leads, error } = await supabase
-    .from('leads')
-    .select('id, lead_name, phone_number, current_classification, current_status, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  const [{ data: leads, error }, notificationsResult] = await Promise.all([
+    supabase
+      .from('leads')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('notifications')
+      .select('id, title, body, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ])
 
   if (error) {
     return (
@@ -27,9 +35,12 @@ export default async function HomePage() {
     )
   }
 
+  const notifications = notificationsResult.error ? [] : notificationsResult.data || []
+
   return (
     <LeadDashboard
       initialLeads={leads || []}
+      notifications={notifications}
       logoutAction={logout}
     />
   )

@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YRM Lead System
 
-## Getting Started
+## Setup
 
-First, run the development server:
+Crie um arquivo `.env.local` com:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+N8N_LEAD_OWNER_USER_ID=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`SUPABASE_SERVICE_ROLE_KEY` é a chave recomendada para a rota de integração do n8n. Se ela não estiver definida, o app usa a chave pública como fallback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Rodando localmente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+## Deploy no Railway / Nixpacks
 
-To learn more about Next.js, take a look at the following resources:
+Use os comandos abaixo na tela de deploy:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Instalação: `npm install`
+- Build: `npm run build`
+- Início: `npm start`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+O script `npm start` já sobe o Next em `0.0.0.0`, compatível com o container do Railway.
 
-## Deploy on Vercel
+Para builders baseados em Nixpacks, o repositório também fixa Node 20 via:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `.nvmrc`
+- `nixpacks.toml` com `NIXPACKS_NODE_VERSION="20"`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Isso evita o fallback para Node 18, que falha com Next.js 16.
+
+Defina também as variáveis de ambiente no serviço:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `N8N_LEAD_OWNER_USER_ID`
+
+## Migração do banco
+
+A migração necessária para suportar integração com n8n está em:
+
+`supabase/migrations/20260326180000_n8n_lead_integration_support.sql`
+
+Ela adiciona:
+
+- campos de qualificação e última interação em `leads`
+- metadados e direção da mensagem em `messages`
+- tabela `notifications`
+
+## Endpoint do n8n
+
+Endpoint completo atual:
+
+`https://elephant-app-leads.zituks.easypanel.host/api/integrations/n8n/lead-events`
+
+Status atual:
+
+- rota pública temporariamente
+- sem `Authorization`
+- sem `x-api-key`
+- o corpo da requisição continua sendo validado
+
+Observação operacional:
+
+- isso só deve permanecer assim enquanto o endpoint não estiver amplamente exposto
+- mantenha o volume controlado
+- reative a autenticação antes de abrir a integração para produção mais ampla
+
+Payload base:
+
+```json
+{
+  "event": "message.created",
+  "external_session_id": "558592607356@s.whatsapp.net",
+  "phone_number": "558592607356",
+  "lead_name": "Arthur Brito",
+  "message_direction": "inbound",
+  "message_content": "Olá, quero entender a solução.",
+  "message_id": "wamid-123",
+  "content_type": "text",
+  "classification": "quente",
+  "lead_tier": "A",
+  "score": 23,
+  "status": "classificado",
+  "qualification_summary": "Lead com urgência e perfil decisor.",
+  "occurred_at": "2026-03-26T16:47:24.214Z",
+  "metadata": {
+    "source": "n8n",
+    "conversation_id": "123",
+    "sender_id": "456"
+  }
+}
+```
+
+Eventos aceitos:
+
+- `lead.created`
+- `lead.classified`
+- `message.created`

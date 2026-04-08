@@ -1,27 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f1ea;
-  --foreground: #1f1a17;
-  --yrm-bg: #f5f1ea;
-  --yrm-surface: #fcfaf7;
-  --yrm-surface-strong: #f2ece4;
-  --yrm-border: #d9cec3;
-  --yrm-border-strong: #b7a694;
-  --yrm-ink: #1f1a17;
-  --yrm-muted: #6f655d;
-  --yrm-muted-soft: #978b80;
-  --yrm-accent: #b86434;
-  --yrm-accent-strong: #8d4d2c;
-  --yrm-danger: #b24a3f;
-  --yrm-danger-soft: #f3ddd8;
-  --yrm-warm: #c9851d;
-  --yrm-warm-soft: #f2e4c8;
-  --yrm-cold: #4e7a94;
-  --yrm-cold-soft: #dce7ee;
-  --yrm-human: #2f6a55;
-  --yrm-human-soft: #dbeae2;
-  --yrm-shadow: 0 10px 30px rgba(31, 26, 23, 0.06);
+  color-scheme: dark;
+  --background: #070b12;
+  --foreground: #f4f7fb;
+  --yrm-bg: #070b12;
+  --yrm-surface: #0d141f;
+  --yrm-surface-strong: #111a27;
+  --yrm-surface-elevated: #162132;
+  --yrm-border: #253244;
+  --yrm-border-strong: #39506d;
+  --yrm-ink: #f4f7fb;
+  --yrm-muted: #9aa9bc;
+  --yrm-muted-soft: #66758a;
+  --yrm-accent: #ff7a3d;
+  --yrm-accent-strong: #ff9b6f;
+  --yrm-danger: #ff7466;
+  --yrm-danger-soft: rgba(255, 116, 102, 0.11);
+  --yrm-warm: #f0b44f;
+  --yrm-warm-soft: rgba(240, 180, 79, 0.12);
+  --yrm-cold: #63b7f4;
+  --yrm-cold-soft: rgba(99, 183, 244, 0.12);
+  --yrm-human: #4cd4a2;
+  --yrm-human-soft: rgba(76, 212, 162, 0.12);
+  --yrm-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
 }
 
 @theme inline {
@@ -34,14 +36,15 @@
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(184, 100, 52, 0.08), transparent 24%),
-    linear-gradient(180deg, #f8f4ee 0%, var(--yrm-bg) 28%, #f1ece5 100%);
+    radial-gradient(circle at top left, rgba(255, 122, 61, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(99, 183, 244, 0.1), transparent 24%),
+    linear-gradient(180deg, #060910 0%, #070b12 42%, #09101a 100%);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
 }
 
 ::selection {
-  background: rgba(184, 100, 52, 0.18);
+  background: rgba(255, 122, 61, 0.28);
   color: var(--yrm-ink);
 }
 
@@ -64,7 +67,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(184, 100, 52, 0.18);
+  box-shadow: 0 0 0 1px rgba(255, 122, 61, 0.6), 0 0 0 4px rgba(255, 122, 61, 0.12);
 }
 
 .yrm-shell {
@@ -72,7 +75,9 @@ textarea:focus-visible {
 }
 
 .yrm-panel {
-  background: var(--yrm-surface);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%),
+    var(--yrm-surface);
   border: 1px solid var(--yrm-border);
   box-shadow: var(--yrm-shadow);
 }
@@ -85,13 +90,13 @@ textarea:focus-visible {
   color: var(--yrm-muted-soft);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .yrm-grid {
   background-image:
-    linear-gradient(rgba(183, 166, 148, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(183, 166, 148, 0.12) 1px, transparent 1px);
+    linear-gradient(rgba(57, 80, 109, 0.24) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 80, 109, 0.24) 1px, transparent 1px);
   background-size: 20px 20px;
 }

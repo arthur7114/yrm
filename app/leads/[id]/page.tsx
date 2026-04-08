@@ -9,6 +9,7 @@ import TemperatureBadge from '@/components/ui/TemperatureBadge'
 import { normalizeLeadStatus } from '@/lib/lead-domain'
 
 import ClassificationHistory from './_components/ClassificationHistory'
+import DeleteLeadDialog from './_components/DeleteLeadDialog'
 import HandoffContextBlock from './_components/HandoffContextBlock'
 import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
@@ -40,7 +41,9 @@ export default async function LeadDetailsPage({
     const resolvedParams = await params
     const resolvedSearchParams = await searchParams
     const leadId = parseInt(resolvedParams.id, 10)
-    const backHref = resolvedSearchParams.from ? decodeURIComponent(resolvedSearchParams.from) : '/leads'
+    const decodedBackHref = resolvedSearchParams.from ? decodeURIComponent(resolvedSearchParams.from) : '/leads'
+    const backHref = decodedBackHref.startsWith('/') ? decodedBackHref : '/leads'
+    const backLabel = backHref === '/' || backHref.startsWith('/?') ? 'Voltar ao dashboard' : 'Voltar para leads'
 
     if (Number.isNaN(leadId)) {
         return (
@@ -54,7 +57,7 @@ export default async function LeadDetailsPage({
                         className="inline-flex items-center gap-2 rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
                     >
                         <ArrowLeft size={16} />
-                        Voltar para leads
+                        {backLabel}
                     </Link>
                 }
             >
@@ -97,7 +100,7 @@ export default async function LeadDetailsPage({
                         className="inline-flex items-center gap-2 rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
                     >
                         <ArrowLeft size={16} />
-                        Voltar para leads
+                        {backLabel}
                     </Link>
                 }
             >
@@ -143,7 +146,7 @@ export default async function LeadDetailsPage({
                     className="inline-flex items-center gap-2 rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
                 >
                     <ArrowLeft size={16} />
-                    Voltar para a carteira
+                    {backLabel}
                 </Link>
             }
         >
@@ -153,25 +156,25 @@ export default async function LeadDetailsPage({
                     description="Resumo rápido da posição atual do lead dentro do funil e da conversa."
                 >
                     <div className="grid gap-4 lg:grid-cols-4">
-                        <div className="rounded-2xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] p-4">
+                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
                             <p className="yrm-kicker">Status</p>
                             <div className="mt-3">
                                 <StatusBadge status={lead.current_status} />
                             </div>
                         </div>
-                        <div className="rounded-2xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] p-4">
+                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
                             <p className="yrm-kicker">Temperatura</p>
                             <div className="mt-3">
                                 <TemperatureBadge temperature={lead.current_classification} />
                             </div>
                         </div>
-                        <div className="rounded-2xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] p-4">
+                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
                             <p className="yrm-kicker">Mensagens</p>
                             <p className="mt-3 font-mono text-3xl font-semibold tracking-[-0.04em] text-[var(--yrm-ink)]">
                                 {messages.length}
                             </p>
                         </div>
-                        <div className="rounded-2xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] p-4">
+                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
                             <p className="yrm-kicker">Eventos</p>
                             <p className="mt-3 font-mono text-3xl font-semibold tracking-[-0.04em] text-[var(--yrm-ink)]">
                                 {operationalEvents.length}
@@ -180,7 +183,7 @@ export default async function LeadDetailsPage({
                     </div>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                        <div className="flex items-center gap-3 rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] px-4 py-3">
+                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
                             <Fingerprint className="h-4 w-4 text-[var(--yrm-muted)]" />
                             <div>
                                 <p className="yrm-kicker">Sessão</p>
@@ -189,7 +192,7 @@ export default async function LeadDetailsPage({
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] px-4 py-3">
+                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
                             <MessageSquareText className="h-4 w-4 text-[var(--yrm-muted)]" />
                             <div>
                                 <p className="yrm-kicker">Último preview</p>
@@ -198,7 +201,7 @@ export default async function LeadDetailsPage({
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] px-4 py-3">
+                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
                             <AudioLines className="h-4 w-4 text-[var(--yrm-muted)]" />
                             <div>
                                 <p className="yrm-kicker">Modo da tela</p>
@@ -211,6 +214,12 @@ export default async function LeadDetailsPage({
                 <div className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
                     <div className="space-y-6">
                         <LeadSummaryCard lead={lead} />
+                        <SectionPanel
+                            title="Ação destrutiva"
+                            description="Exclua este lead apenas quando tiver certeza. A remoção é permanente."
+                        >
+                            <DeleteLeadDialog leadId={leadId} backHref={backHref} />
+                        </SectionPanel>
                         {qualification ? <QualificationResultBlock result={qualification} /> : null}
                         {handoffContext ? (
                             <HandoffContextBlock

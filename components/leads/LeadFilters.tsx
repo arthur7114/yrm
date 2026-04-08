@@ -45,7 +45,7 @@ export default function LeadFilters({
                     name="q"
                     defaultValue={query}
                     placeholder="Nome ou telefone"
-                    className="w-full rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm text-[var(--yrm-ink)] placeholder:text-[var(--yrm-muted-soft)]"
+                    className="w-full rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm text-[var(--yrm-ink)] placeholder:text-[var(--yrm-muted-soft)]"
                 />
             </label>
 
@@ -54,7 +54,7 @@ export default function LeadFilters({
                 <select
                     name="range"
                     defaultValue={range}
-                    className="w-full rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
+                    className="w-full rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
                 >
                     {rangeOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -69,7 +69,7 @@ export default function LeadFilters({
                 <select
                     name="status"
                     defaultValue={status}
-                    className="w-full rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
+                    className="w-full rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
                 >
                     {statusOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -84,7 +84,7 @@ export default function LeadFilters({
                 <select
                     name="temperature"
                     defaultValue={temperature}
-                    className="w-full rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
+                    className="w-full rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
                 >
                     {temperatureOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -97,13 +97,13 @@ export default function LeadFilters({
             <div className="flex items-end gap-3 lg:col-span-4">
                 <button
                     type="submit"
-                    className="rounded-xl border border-[var(--yrm-accent)] bg-[var(--yrm-accent)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--yrm-accent-strong)]"
+                    className="rounded-2xl border border-[rgba(255,122,61,0.28)] bg-[var(--yrm-accent)] px-4 py-3 text-sm font-semibold text-[#090d14] hover:bg-[var(--yrm-accent-strong)]"
                 >
                     Aplicar filtros
                 </button>
                 <Link
                     href="/leads"
-                    className="rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
+                    className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:bg-[var(--yrm-surface-strong)] hover:text-[var(--yrm-ink)]"
                 >
                     Limpar
                 </Link>

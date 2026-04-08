@@ -60,7 +60,7 @@ export default async function SettingsPage() {
                     description="Superfícies auxiliares para teste e validação do fluxo, fora da navegação principal."
                     aside={<FlaskConical className="h-4 w-4 text-[var(--yrm-muted)]" />}
                 >
-                    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] p-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-col gap-4 rounded-[1.6rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-5 lg:flex-row lg:items-center lg:justify-between">
                         <div className="space-y-1">
                             <p className="yrm-kicker">Laboratório</p>
                             <h3 className="text-lg font-semibold tracking-[-0.03em] text-[var(--yrm-ink)]">

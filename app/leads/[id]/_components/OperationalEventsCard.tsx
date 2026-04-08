@@ -78,8 +78,8 @@ export default function OperationalEventsCard({ events }: { events: LeadOperatio
     }
 
     return (
-        <div className="yrm-panel overflow-hidden rounded-2xl">
-            <div className="flex items-center gap-2 border-b border-[rgba(183,166,148,0.5)] bg-[var(--yrm-surface-strong)] px-6 py-4">
+        <div className="yrm-panel overflow-hidden rounded-[1.6rem]">
+            <div className="flex items-center gap-2 border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-4">
                 <Clock3 className="h-4 w-4 text-[var(--yrm-muted)]" />
                 <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
                     Eventos operacionais
@@ -88,7 +88,7 @@ export default function OperationalEventsCard({ events }: { events: LeadOperatio
                     {events.length} eventos
                 </span>
             </div>
-            <div className="max-h-[360px] divide-y divide-[rgba(183,166,148,0.4)] overflow-y-auto">
+            <div className="max-h-[360px] divide-y divide-[var(--yrm-border)] overflow-y-auto">
                 {events.map((event) => {
                     const copy = getEventCopy(event)
 

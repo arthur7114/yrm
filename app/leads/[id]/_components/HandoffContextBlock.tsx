@@ -25,7 +25,7 @@ export default function HandoffContextBlock({
     })
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-[rgba(47,106,85,0.24)] bg-[var(--yrm-surface)] shadow-[var(--yrm-shadow)]">
+        <div className="overflow-hidden rounded-[1.6rem] border border-[rgba(76,212,162,0.22)] bg-[var(--yrm-surface)] shadow-[var(--yrm-shadow)]">
             <div className="flex items-center gap-2 border-b border-[rgba(47,106,85,0.18)] bg-[var(--yrm-human-soft)] px-6 py-4">
                 <UserCheck className="h-5 w-5 text-[var(--yrm-human)]" />
                 <div>
@@ -50,7 +50,7 @@ export default function HandoffContextBlock({
                             <Brain className="h-4 w-4 text-[var(--yrm-muted)]" />
                             Intenção interpretada
                         </h4>
-                        <p className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
+                        <p className="rounded-[1.4rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
                             {qualification.confidence_reason}
                         </p>
                     </div>
@@ -62,7 +62,7 @@ export default function HandoffContextBlock({
                             <Bot className="h-4 w-4 text-[var(--yrm-muted)]" />
                             Última resposta automática
                         </h4>
-                        <p className="rounded-2xl border border-[rgba(184,100,52,0.22)] bg-[rgba(184,100,52,0.08)] p-4 text-sm leading-6 text-[var(--yrm-ink)]">
+                        <p className="rounded-[1.4rem] border border-[rgba(255,122,61,0.22)] bg-[rgba(255,122,61,0.08)] p-4 text-sm leading-6 text-[var(--yrm-ink)]">
                             {systemResponse}
                         </p>
                     </div>
@@ -74,7 +74,7 @@ export default function HandoffContextBlock({
                             <MessageSquare className="h-4 w-4 text-[var(--yrm-muted)]" />
                             Última mensagem do lead
                         </h4>
-                        <p className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
+                        <p className="rounded-[1.4rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
                             {lastLeadMessage}
                         </p>
                     </div>

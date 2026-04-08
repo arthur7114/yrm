@@ -33,8 +33,8 @@ export default function ClassificationHistory({ events }: { events: Classificati
     }
 
     return (
-        <div className="yrm-panel overflow-hidden rounded-2xl">
-            <div className="flex items-center gap-2 border-b border-[rgba(183,166,148,0.5)] bg-[var(--yrm-surface-strong)] px-6 py-4">
+        <div className="yrm-panel overflow-hidden rounded-[1.6rem]">
+            <div className="flex items-center gap-2 border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-4">
                 <History className="h-4 w-4 text-[var(--yrm-muted)]" />
                 <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
                     Histórico de classificação
@@ -44,7 +44,7 @@ export default function ClassificationHistory({ events }: { events: Classificati
                 </span>
             </div>
 
-            <div className="max-h-[320px] divide-y divide-[rgba(183,166,148,0.4)] overflow-y-auto">
+            <div className="max-h-[320px] divide-y divide-[var(--yrm-border)] overflow-y-auto">
                 {events.map((event) => {
                     const prevConfig = getConfig(event.previous_classification)
                     const nextConfig = getConfig(event.new_classification)
@@ -52,11 +52,11 @@ export default function ClassificationHistory({ events }: { events: Classificati
                     return (
                         <div key={event.id} className="space-y-2 px-6 py-4">
                             <div className="flex items-center gap-2">
-                                <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${prevConfig.bg} ${prevConfig.color} ${prevConfig.border}`}>
+                                <span className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${prevConfig.bg} ${prevConfig.color} ${prevConfig.border}`}>
                                     {prevConfig.label}
                                 </span>
                                 <ArrowRight className="h-3 w-3 text-[var(--yrm-muted-soft)]" />
-                                <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${nextConfig.bg} ${nextConfig.color} ${nextConfig.border}`}>
+                                <span className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${nextConfig.bg} ${nextConfig.color} ${nextConfig.border}`}>
                                     {nextConfig.label}
                                 </span>
                             </div>

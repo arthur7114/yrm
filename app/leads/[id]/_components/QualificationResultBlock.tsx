@@ -30,7 +30,7 @@ function getClassificationStyling(cls: string) {
         }
     }
     return {
-        badgeClass: 'border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] text-[var(--yrm-muted)]',
+        badgeClass: 'border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] text-[var(--yrm-muted)]',
         icon: null,
         label: cls,
     }
@@ -40,15 +40,15 @@ export default function QualificationResultBlock({ result }: { result: Qualifica
     const { badgeClass, icon, label } = getClassificationStyling(result.classification)
 
     return (
-        <div className="yrm-panel overflow-hidden rounded-2xl">
-            <div className="flex items-center justify-between border-b border-[rgba(183,166,148,0.5)] bg-[var(--yrm-surface-strong)] px-6 py-4">
+        <div className="yrm-panel overflow-hidden rounded-[1.6rem]">
+            <div className="flex items-center justify-between border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-4">
                 <div>
                     <p className="yrm-kicker">Qualificação</p>
                     <h3 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-[var(--yrm-ink)]">
                         Leitura comercial atual
                     </h3>
                 </div>
-                <div className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${badgeClass}`}>
+                <div className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${badgeClass}`}>
                     {icon} {label}
                 </div>
             </div>
@@ -57,7 +57,7 @@ export default function QualificationResultBlock({ result }: { result: Qualifica
                 <p className="text-sm font-medium uppercase tracking-[0.14em] text-[var(--yrm-muted-soft)]">
                     Justificativa consolidada
                 </p>
-                <p className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.86)] p-4 text-sm leading-6 text-[var(--yrm-ink)]">
+                <p className="rounded-[1.4rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-6 text-[var(--yrm-ink)]">
                     {result.confidence_reason}
                 </p>
             </div>

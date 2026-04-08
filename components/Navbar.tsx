@@ -16,11 +16,11 @@ export default function Navbar() {
     if (pathname === '/login') return null
 
     return (
-        <nav className="sticky top-0 z-40 border-b border-[rgba(183,166,148,0.55)] bg-[rgba(248,244,238,0.9)] backdrop-blur">
+        <nav className="sticky top-0 z-40 border-b border-[var(--yrm-border)] bg-[rgba(7,11,18,0.86)] backdrop-blur-xl">
             <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-8">
                     <Link href="/" className="flex shrink-0 items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--yrm-border-strong)] bg-[var(--yrm-surface)] font-mono text-sm font-semibold tracking-[0.2em] text-[var(--yrm-accent-strong)]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--yrm-border-strong)] bg-[var(--yrm-surface-strong)] font-mono text-sm font-semibold tracking-[0.2em] text-[var(--yrm-accent)] shadow-[0_0_0_1px_rgba(255,122,61,0.12)]">
                             YRM
                         </span>
                         <div className="hidden sm:block">
@@ -42,10 +42,10 @@ export default function Navbar() {
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`rounded-lg px-3 py-2 text-sm font-medium ${
+                                    className={`rounded-xl border px-3.5 py-2 text-sm font-medium ${
                                         isActive
-                                            ? 'bg-[var(--yrm-surface)] text-[var(--yrm-accent-strong)] shadow-[inset_0_0_0_1px_var(--yrm-border-strong)]'
-                                            : 'text-[var(--yrm-muted)] hover:bg-[rgba(252,250,247,0.9)] hover:text-[var(--yrm-ink)]'
+                                            ? 'border-[rgba(255,122,61,0.28)] bg-[rgba(255,122,61,0.12)] text-[var(--yrm-accent-strong)] shadow-[inset_0_0_0_1px_rgba(255,122,61,0.16)]'
+                                            : 'border-transparent text-[var(--yrm-muted)] hover:border-[var(--yrm-border)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--yrm-ink)]'
                                     }`}
                                 >
                                     {item.label}
@@ -56,12 +56,12 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="hidden rounded-lg border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--yrm-muted)] sm:block">
+                    <div className="hidden rounded-xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--yrm-muted)] sm:block">
                         fluxo principal
                     </div>
                     <button
                         onClick={() => logout()}
-                        className="rounded-lg border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-3 py-2 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
+                        className="rounded-xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-3 py-2 text-sm font-medium text-[var(--yrm-muted)] hover:border-[var(--yrm-border-strong)] hover:bg-[var(--yrm-surface-strong)] hover:text-[var(--yrm-ink)]"
                     >
                         Sair
                     </button>

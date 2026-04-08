@@ -58,6 +58,11 @@ type LeadAccessResult = {
     error: string | null
 }
 
+type DeleteDependencyResult = {
+    success: boolean
+    message?: string
+}
+
 async function getAuthClient() {
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -120,6 +125,26 @@ async function ensureLeadAccess(
     }
 
     return { lead: data, error: null }
+}
+
+async function deleteLeadDependency(
+    supabase: AppSupabaseClient,
+    table: string,
+    leadId: number,
+    optional = false
+): Promise<DeleteDependencyResult> {
+    const { error } = await supabase.from(table).delete().eq('lead_id', leadId)
+
+    if (!error) {
+        return { success: true }
+    }
+
+    if (optional && (error.code === '42P01' || error.message.toLowerCase().includes('does not exist'))) {
+        return { success: true }
+    }
+
+    console.error(`Delete dependency error on ${table}:`, error)
+    return { success: false, message: `Erro ao limpar registros relacionados em ${table}.` }
 }
 
 async function insertIntegrationEvent(
@@ -676,6 +701,20 @@ export async function deleteLead(leadId: number): Promise<FetchState> {
         return { success: false, message: access.error || 'Lead não encontrado ou acesso restrito.' }
     }
 
+    const dependencyDeletes = await Promise.all([
+        deleteLeadDependency(supabase, 'lead_qualifications', leadId),
+        deleteLeadDependency(supabase, 'lead_classification_events', leadId),
+        deleteLeadDependency(supabase, 'lead_classification_history', leadId, true),
+    ])
+
+    const dependencyFailure = dependencyDeletes.find((result) => !result.success)
+    if (dependencyFailure) {
+        return {
+            success: false,
+            message: dependencyFailure.message || 'Erro ao limpar dependências do lead antes da exclusão.',
+        }
+    }
+
     const { error: deleteError } = await supabase
         .from('leads')
         .delete()
@@ -687,5 +726,7 @@ export async function deleteLead(leadId: number): Promise<FetchState> {
     }
 
     revalidatePath('/')
+    revalidatePath('/leads')
+    revalidatePath(`/leads/${leadId}`)
     return { success: true }
 }

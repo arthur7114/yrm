@@ -132,7 +132,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
 
             <div className={`space-y-2 ${isPending ? 'pointer-events-none opacity-60' : ''}`}>
                 {questions.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-[var(--yrm-border-strong)] bg-[rgba(252,250,247,0.84)] p-6 text-sm text-[var(--yrm-muted)]">
+                    <div className="rounded-[1.6rem] border border-dashed border-[var(--yrm-border-strong)] bg-[rgba(255,255,255,0.03)] p-6 text-sm text-[var(--yrm-muted)]">
                         Nenhuma pergunta cadastrada. Adicione a primeira para compor a qualificação.
                     </div>
                 ) : (
@@ -140,7 +140,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
                         {questions.map((question, idx) => (
                             <li
                                 key={question.id}
-                                className={`flex items-center gap-3 border-b border-[rgba(183,166,148,0.35)] px-4 py-4 last:border-b-0 ${
+                                className={`flex items-center gap-3 border-b border-[var(--yrm-border)] px-4 py-4 last:border-b-0 ${
                                     question.is_active ? '' : 'bg-[rgba(111,101,93,0.08)]'
                                 }`}
                                 draggable

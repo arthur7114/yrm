@@ -35,12 +35,12 @@ export default function LeadRow({ lead, href }: LeadRowProps) {
     return (
         <Link
             href={href}
-            className="block rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.94)] p-4 hover:border-[var(--yrm-border-strong)] hover:shadow-[var(--yrm-shadow)]"
+            className="group block cursor-pointer rounded-[1.6rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] p-4 hover:border-[var(--yrm-border-strong)] hover:bg-[rgba(255,255,255,0.04)] hover:shadow-[var(--yrm-shadow)]"
         >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 flex-1 space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold tracking-[-0.03em] text-[var(--yrm-ink)]">
+                        <h3 className="text-lg font-semibold tracking-[-0.04em] text-[var(--yrm-ink)] transition-transform duration-200 group-hover:translate-x-0.5">
                             {displayName}
                         </h3>
                         <TemperatureBadge temperature={lead.current_classification} />
@@ -66,7 +66,7 @@ export default function LeadRow({ lead, href }: LeadRowProps) {
                     </div>
                 </div>
 
-                <div className="min-w-[11rem] rounded-xl border border-[rgba(183,166,148,0.45)] bg-[var(--yrm-surface)] px-4 py-3">
+                <div className="min-w-[11rem] rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-4 py-3">
                     <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--yrm-muted-soft)]">
                         Contato
                     </p>

@@ -11,11 +11,11 @@ export default function TemperatureBadge({
 }) {
     const normalized = temperature?.trim().toLowerCase() || ''
     const label = normalized ? normalized.toUpperCase() : 'SEM SINAL'
-    const badgeClass = temperatureStyles[normalized] || 'border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] text-[var(--yrm-muted)]'
+    const badgeClass = temperatureStyles[normalized] || 'border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] text-[var(--yrm-muted)]'
 
     return (
         <span
-            className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${badgeClass}`}
+            className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${badgeClass}`}
         >
             {label}
         </span>

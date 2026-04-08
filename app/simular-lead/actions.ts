@@ -65,8 +65,8 @@ export async function submitLeadSimulation(prevState: FormState, formData: FormD
                 .insert({
                     lead_name: name || undefined,
                     phone_number: phone || undefined,
-                    current_classification: 'frio',
-                    current_status: 'aguardando_classificacao'
+                    current_classification: null,
+                    current_status: 'novo'
                 })
                 .select('id')
                 .single()

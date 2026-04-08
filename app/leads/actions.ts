@@ -74,8 +74,8 @@ export async function createLead(prevState: CreateLeadState, formData: FormData)
         user_id: user.id,
         lead_name: name || null,
         phone_number: phone || null,
-        current_status: 'aguardando_classificacao',
-        current_classification: 'frio',
+        current_status: 'novo',
+        current_classification: null,
     })
 
     if (error) {

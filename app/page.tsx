@@ -72,8 +72,7 @@ export default async function HomePage() {
         hotLeads: leads?.filter((lead) => lead.current_classification === 'quente').length || 0,
         warmLeads: leads?.filter((lead) => lead.current_classification === 'morno').length || 0,
         coldLeads: leads?.filter((lead) => lead.current_classification === 'frio').length || 0,
-        unclassifiedLeads:
-            leads?.filter((lead) => !lead.current_classification || lead.current_status === 'aguardando_classificacao').length || 0,
+        unclassifiedLeads: leads?.filter((lead) => !lead.current_classification).length || 0,
         totalMessages,
         dailyData,
     }

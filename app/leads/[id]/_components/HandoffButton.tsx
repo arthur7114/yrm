@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { UserCheck, Loader2, AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Loader2, UserCheck } from 'lucide-react'
+
 import { handoffLeadToHuman } from '../actions'
 
 export default function HandoffButton({ leadId }: { leadId: number }) {
@@ -12,39 +13,39 @@ export default function HandoffButton({ leadId }: { leadId: number }) {
     const handleHandoff = () => {
         setErrorMsg('')
         startTransition(async () => {
-            const res = await handoffLeadToHuman(leadId)
-            if (!res.success) {
-                setErrorMsg(res.message || 'Erro inesperado.')
+            const result = await handoffLeadToHuman(leadId)
+            if (!result.success) {
+                setErrorMsg(result.message || 'Erro inesperado.')
                 setShowConfirm(false)
             }
-            // On success, the page revalidates and re-renders automatically
         })
     }
 
     if (showConfirm) {
         return (
-            <div className="bg-amber-50 rounded-lg border border-amber-200 p-5">
-                <div className="flex items-start gap-3 mb-4">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-5">
+                <div className="mb-4 flex items-start gap-3">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
                     <div>
-                        <h4 className="text-sm font-semibold text-amber-900">Confirmar encaminhamento</h4>
-                        <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                            Após confirmar, o sistema não responderá mais automaticamente a este lead. A automação será desativada permanentemente.
+                        <h4 className="text-sm font-semibold text-amber-900">Confirmar handoff manual</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-amber-700">
+                            Esta é uma ação manual de fallback. O lead será movido para
+                            {' '}<code>aguardando_humano</code> e o fluxo automático deixará de responder.
                         </p>
                     </div>
                 </div>
 
-                {errorMsg && (
-                    <div className="mb-3 p-2 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+                {errorMsg ? (
+                    <div className="mb-3 rounded-md border border-red-100 bg-red-50 p-2 text-sm text-red-600">
                         {errorMsg}
                     </div>
-                )}
+                ) : null}
 
                 <div className="flex gap-2">
                     <button
                         onClick={handleHandoff}
                         disabled={isPending}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
                     >
                         {isPending ? (
                             <>
@@ -54,14 +55,17 @@ export default function HandoffButton({ leadId }: { leadId: number }) {
                         ) : (
                             <>
                                 <UserCheck className="h-4 w-4" />
-                                Sim, encaminhar
+                                Confirmar handoff
                             </>
                         )}
                     </button>
                     <button
-                        onClick={() => { setShowConfirm(false); setErrorMsg('') }}
+                        onClick={() => {
+                            setShowConfirm(false)
+                            setErrorMsg('')
+                        }}
                         disabled={isPending}
-                        className="px-4 py-2 rounded-md text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
                     >
                         Cancelar
                     </button>
@@ -73,10 +77,10 @@ export default function HandoffButton({ leadId }: { leadId: number }) {
     return (
         <button
             onClick={() => setShowConfirm(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-green-200 bg-green-50 text-green-700 text-sm font-medium hover:bg-green-100 hover:border-green-300 transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700 transition-colors hover:border-green-300 hover:bg-green-100"
         >
             <UserCheck className="h-4 w-4" />
-            Encaminhar para Atendimento Humano
+            Solicitar Handoff Manual
         </button>
     )
 }

@@ -12,7 +12,7 @@ import {
   type MessageSenderType,
   normalizeLeadStatus,
 } from '@/lib/lead-domain'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 type ContentType = 'text' | 'audio' | 'image' | 'video' | 'attachment'
 type LeadEventSource = 'n8n' | 'app'
@@ -93,6 +93,10 @@ type ProcessResult = {
   createdMessage: boolean
   createdNotification: boolean
   duplicateEvent: boolean
+}
+
+function supabaseAdmin() {
+  return getSupabaseAdmin()
 }
 
 function normalizeString(value: unknown) {
@@ -343,6 +347,7 @@ export function validateLeadEventPayload(payload: unknown) {
 
 async function findRecordedIntegrationEvent(eventId: string) {
   const { data, error } = await supabaseAdmin
+    ()
     .from('integration_events')
     .select('lead_id')
     .eq('event_id', eventId)
@@ -357,6 +362,7 @@ async function findRecordedIntegrationEvent(eventId: string) {
 
 async function findMessageByExternalMessageId(externalMessageId: string) {
   const { data, error } = await supabaseAdmin
+    ()
     .from('messages')
     .select('lead_id')
     .eq('external_message_id', externalMessageId)
@@ -372,6 +378,7 @@ async function findMessageByExternalMessageId(externalMessageId: string) {
 
 async function findLead(ownerUserId: string, externalSessionId: string) {
   const { data, error } = await supabaseAdmin
+    ()
     .from('leads')
     .select(
       'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at'
@@ -402,7 +409,7 @@ async function updateLeadIdentity(leadId: number, leadRef: CanonicalLeadRef) {
     return
   }
 
-  const { error } = await supabaseAdmin.from('leads').update(leadUpdate).eq('id', leadId)
+  const { error } = await supabaseAdmin().from('leads').update(leadUpdate).eq('id', leadId)
 
   if (error) {
     throw error
@@ -411,6 +418,7 @@ async function updateLeadIdentity(leadId: number, leadRef: CanonicalLeadRef) {
 
 async function createLead(ownerUserId: string, leadRef: CanonicalLeadRef) {
   const { data, error } = await supabaseAdmin
+    ()
     .from('leads')
     .insert({
       user_id: ownerUserId,
@@ -463,7 +471,7 @@ async function requireExistingLead(ownerUserId: string, leadRef: CanonicalLeadRe
 }
 
 async function recordIntegrationEvent(leadId: number, event: CanonicalLeadEventEnvelope) {
-  const { error } = await supabaseAdmin.from('integration_events').insert({
+  const { error } = await supabaseAdmin().from('integration_events').insert({
     event_id: event.event_id,
     lead_id: leadId,
     event_type: event.event_type,
@@ -493,7 +501,7 @@ async function createNotification(
   body: string,
   metadata: EventMetadata
 ) {
-  const { error } = await supabaseAdmin.from('notifications').insert({
+  const { error } = await supabaseAdmin().from('notifications').insert({
     user_id: ownerUserId,
     lead_id: leadId,
     type,
@@ -513,7 +521,7 @@ async function createMessage(
   metadata: EventMetadata,
   occurredAt: string
 ) {
-  const { error } = await supabaseAdmin.from('messages').insert({
+  const { error } = await supabaseAdmin().from('messages').insert({
     lead_id: leadId,
     sender_type: payload.sender_type,
     message_content: payload.message_content,
@@ -541,6 +549,7 @@ async function updateLeadMessageSnapshot(
   occurredAt: string
 ) {
   const { error } = await supabaseAdmin
+    ()
     .from('leads')
     .update({
       last_message_at: parseOccurredAt(occurredAt),
@@ -564,7 +573,7 @@ async function insertLeadStatusEvent(
       ? 'classified_handoff_requested'
       : 'classified_target_status_applied'
 
-  const { error } = await supabaseAdmin.from('lead_status_events').insert({
+  const { error } = await supabaseAdmin().from('lead_status_events').insert({
     lead_id: leadId,
     source_event_id: event.event_id,
     source: event.source,
@@ -586,6 +595,7 @@ async function openPendingHandoff(
   event: CanonicalLeadEventEnvelope<'lead.classified'>
 ) {
   const { data: latestHandoff, error: handoffLookupError } = await supabaseAdmin
+    ()
     .from('lead_handoffs')
     .select('id')
     .eq('lead_id', lead.id)
@@ -604,7 +614,7 @@ async function openPendingHandoff(
   const handoffSummary = event.payload.handoff_summary || event.payload.qualification_summary
   const handoffPriority = event.payload.handoff_priority || 'normal'
 
-  const { error } = await supabaseAdmin.from('lead_handoffs').insert({
+  const { error } = await supabaseAdmin().from('lead_handoffs').insert({
     lead_id: lead.id,
     summary_context: handoffSummary,
     priority: handoffPriority,
@@ -649,6 +659,7 @@ async function applyClassificationEvent(
   const shouldRecordStatusChange = lead.current_status !== nextStatus
 
   const { error } = await supabaseAdmin
+    ()
     .from('leads')
     .update({
       current_classification: event.payload.temperatura,
@@ -666,7 +677,7 @@ async function applyClassificationEvent(
   }
 
   if (lead.current_classification && lead.current_classification !== event.payload.temperatura) {
-    const { error: classificationHistoryError } = await supabaseAdmin
+    const { error: classificationHistoryError } = await supabaseAdmin()
       .from('lead_classification_events')
       .insert({
         lead_id: lead.id,

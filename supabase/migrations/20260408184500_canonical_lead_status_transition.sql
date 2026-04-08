@@ -1,10 +1,14 @@
-begin;
+commit;
 
 alter type public.lead_status add value if not exists 'novo';
 alter type public.lead_status add value if not exists 'em_qualificacao';
 alter type public.lead_status add value if not exists 'aguardando_humano';
 alter type public.lead_status add value if not exists 'em_atendimento_humano';
 alter type public.lead_status add value if not exists 'encerrado';
+
+commit;
+
+begin;
 
 update public.leads
 set current_status = case

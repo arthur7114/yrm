@@ -65,8 +65,9 @@ export async function POST(request: NextRequest) {
       ...result,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error'
+    console.error('Webhook error:', error)
+    const message = error instanceof Error ? error.message : JSON.stringify(error)
 
-    return internalServerError(message)
+    return internalServerError(message || 'Unexpected error')
   }
 }

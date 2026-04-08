@@ -20,7 +20,7 @@ export interface QualificationQuestion {
     created_at: string
 }
 
-export type ActionState<T = any> = {
+export type ActionState<T = unknown> = {
     success?: boolean
     message?: string
     data?: T
@@ -61,7 +61,11 @@ export async function getBusinessContext(): Promise<ActionState<BusinessContext 
 }
 
 
-export async function saveBusinessContext(prevState: any, formData: FormData): Promise<ActionState> {
+export async function saveBusinessContext(
+    prevState: ActionState,
+    formData: FormData
+): Promise<ActionState> {
+    void prevState
     const { supabase, user } = await getAuthClient()
     if (!user) return { success: false, message: 'Sessão expirada. Faça login novamente.' }
 
@@ -121,7 +125,11 @@ export async function getQualificationQuestions(): Promise<ActionState<Qualifica
     return { success: true, data: data as QualificationQuestion[] }
 }
 
-export async function createQualificationQuestion(prevState: any, formData: FormData): Promise<ActionState> {
+export async function createQualificationQuestion(
+    prevState: ActionState | null,
+    formData: FormData
+): Promise<ActionState> {
+    void prevState
     const { supabase, user } = await getAuthClient()
     if (!user) return { success: false, message: 'Sessão expirada. Faça login novamente.' }
 

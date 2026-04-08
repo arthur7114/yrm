@@ -1,21 +1,23 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 
-const geistSans = Geist({
+const plexSans = IBM_Plex_Sans({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
-const geistMono = Geist_Mono({
+const plexMono = IBM_Plex_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  weight: ['400', '500', '600'],
 })
 
 export const metadata: Metadata = {
-  title: 'Lead System AI',
-  description: 'Intelligent Lead Qualification System',
+  title: 'YRM',
+  description: 'Central executiva de performance e operação de leads.',
 }
 
 export default function RootLayout({
@@ -25,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 min-h-screen`}
-      >
+      <body className={`${plexSans.variable} ${plexMono.variable} min-h-screen antialiased`}>
         <Navbar />
         {children}
       </body>

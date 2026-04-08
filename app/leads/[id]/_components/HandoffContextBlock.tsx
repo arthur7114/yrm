@@ -1,11 +1,7 @@
-import { UserCheck, MessageSquare, Brain, Bot, Clock } from 'lucide-react'
-import type { HandoffContext, LeadQualification } from '../actions'
+import { Bot, Brain, Clock, MessageSquare, UserCheck } from 'lucide-react'
 
-const classificationConfig: Record<string, { label: string; icon: string; color: string; bg: string; border: string }> = {
-    'frio': { label: 'Frio', icon: '❄️', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
-    'morno': { label: 'Morno', icon: '✨', color: 'text-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-200' },
-    'quente': { label: 'Quente', icon: '🔥', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
-}
+import TemperatureBadge from '@/components/ui/TemperatureBadge'
+import type { HandoffContext, LeadQualification } from '../actions'
 
 type HandoffContextBlockProps = {
     handoff: HandoffContext
@@ -14,10 +10,12 @@ type HandoffContextBlockProps = {
     systemResponse: string | null
 }
 
-export default function HandoffContextBlock({ handoff, qualification, lastLeadMessage, systemResponse }: HandoffContextBlockProps) {
-    const classification = qualification?.classification?.toLowerCase() || ''
-    const config = classificationConfig[classification] || { label: classification || 'N/A', icon: '❓', color: 'text-gray-700', bg: 'bg-gray-50', border: 'border-gray-200' }
-
+export default function HandoffContextBlock({
+    handoff,
+    qualification,
+    lastLeadMessage,
+    systemResponse,
+}: HandoffContextBlockProps) {
     const handoffDate = new Date(handoff.created_at).toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -27,76 +25,60 @@ export default function HandoffContextBlock({ handoff, qualification, lastLeadMe
     })
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-green-200 overflow-hidden">
-
-            {/* Header */}
-            <div className="px-6 py-4 bg-green-50 border-b border-green-100 flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-green-600" />
-                <span className="text-sm font-semibold text-green-800">Encaminhado ao Humano</span>
-                <span className="ml-auto flex items-center gap-1 text-[11px] text-green-600">
+        <div className="overflow-hidden rounded-2xl border border-[rgba(47,106,85,0.24)] bg-[var(--yrm-surface)] shadow-[var(--yrm-shadow)]">
+            <div className="flex items-center gap-2 border-b border-[rgba(47,106,85,0.18)] bg-[var(--yrm-human-soft)] px-6 py-4">
+                <UserCheck className="h-5 w-5 text-[var(--yrm-human)]" />
+                <div>
+                    <p className="yrm-kicker">Handoff</p>
+                    <span className="text-sm font-semibold text-[var(--yrm-human)]">Encaminhado ao humano</span>
+                </div>
+                <span className="ml-auto flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yrm-human)]">
                     <Clock className="h-3 w-3" />
                     {handoffDate}
                 </span>
             </div>
 
-            {/* Context Body */}
-            <div className="p-6 space-y-5">
-
-                {/* Classification */}
-                <div>
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Classificação
-                    </h4>
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-medium border ${config.bg} ${config.color} ${config.border}`}>
-                        {config.icon} {config.label.toUpperCase()}
-                    </span>
+            <div className="space-y-5 p-6">
+                <div className="space-y-2">
+                    <p className="yrm-kicker">Temperatura no handoff</p>
+                    <TemperatureBadge temperature={qualification?.classification} />
                 </div>
 
-                {/* AI Reasoning */}
-                {qualification?.confidence_reason && (
-                    <div>
-                        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            <Brain className="h-3.5 w-3.5" />
-                            Intenção Interpretada
+                {qualification?.confidence_reason ? (
+                    <div className="space-y-2">
+                        <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--yrm-ink)]">
+                            <Brain className="h-4 w-4 text-[var(--yrm-muted)]" />
+                            Intenção interpretada
                         </h4>
-                        <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-100">
+                        <p className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
                             {qualification.confidence_reason}
                         </p>
                     </div>
-                )}
+                ) : null}
 
-                {/* System Response */}
-                {systemResponse && (
-                    <div>
-                        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            <Bot className="h-3.5 w-3.5" />
-                            Resposta Automática Enviada
+                {systemResponse ? (
+                    <div className="space-y-2">
+                        <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--yrm-ink)]">
+                            <Bot className="h-4 w-4 text-[var(--yrm-muted)]" />
+                            Última resposta automática
                         </h4>
-                        <p className="text-sm text-gray-700 leading-relaxed bg-indigo-50 p-3 rounded-md border border-indigo-100">
+                        <p className="rounded-2xl border border-[rgba(184,100,52,0.22)] bg-[rgba(184,100,52,0.08)] p-4 text-sm leading-6 text-[var(--yrm-ink)]">
                             {systemResponse}
                         </p>
                     </div>
-                )}
+                ) : null}
 
-                {/* Last Lead Message */}
-                {lastLeadMessage && (
-                    <div>
-                        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            <MessageSquare className="h-3.5 w-3.5" />
-                            Última Mensagem do Lead
+                {lastLeadMessage ? (
+                    <div className="space-y-2">
+                        <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--yrm-ink)]">
+                            <MessageSquare className="h-4 w-4 text-[var(--yrm-muted)]" />
+                            Última mensagem do lead
                         </h4>
-                        <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-100">
+                        <p className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(252,250,247,0.84)] p-4 text-sm leading-6 text-[var(--yrm-muted)]">
                             {lastLeadMessage}
                         </p>
                     </div>
-                )}
-
-                {/* No Automation Notice */}
-                <div className="pt-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-400 text-center italic">
-                        Automação encerrada — atendimento sob responsabilidade humana.
-                    </p>
-                </div>
+                ) : null}
             </div>
         </div>
     )

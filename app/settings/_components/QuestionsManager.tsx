@@ -1,33 +1,34 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useFormStatus } from 'react-dom'
+import {
+    CheckIcon,
+    GripVerticalIcon,
+    PencilIcon,
+    PlusIcon,
+    PowerIcon,
+    PowerOffIcon,
+    Trash2Icon,
+    X,
+} from 'lucide-react'
+
 import {
     createQualificationQuestion,
-    updateQualificationQuestion,
     deleteQualificationQuestion,
+    QualificationQuestion,
+    updateQualificationQuestion,
     updateQuestionOrdering,
-    QualificationQuestion
 } from '../actions'
-// @ts-ignore
-import { useFormStatus } from 'react-dom'
-import { GripVerticalIcon, PlusIcon, Trash2Icon, PencilIcon, CheckIcon, X, PowerIcon, PowerOffIcon } from 'lucide-react'
-
-// Simple drag and drop using HTML5 native APIs for simplicity
-// For production, libraries like dnd-kit are better but this keeps it clean.
 
 export default function QuestionsManager({ initialQuestions }: { initialQuestions: QualificationQuestion[] }) {
     const [questions, setQuestions] = useState(initialQuestions)
     const [isPending, startTransition] = useTransition()
     const [errorMsg, setErrorMsg] = useState('')
-
-    // Edit state
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editValue, setEditValue] = useState('')
-
-    // Drag state
     const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
 
-    // Sync if initial props change (Next.js server action revalidation)
     useEffect(() => {
         setQuestions(initialQuestions)
     }, [initialQuestions])
@@ -38,11 +39,10 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
         if (!res.success) {
             setErrorMsg(res.message || 'Erro ao adicionar pergunta.')
         }
-        // Form is reset naturally or by revalidation depending on setup
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Tem certeza que deseja apagar esta pergunta? Essa ação não pode ser desfeita.')) return
+        if (!confirm('Tem certeza que deseja apagar esta pergunta?')) return
 
         setErrorMsg('')
         startTransition(async () => {
@@ -59,9 +59,9 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
         })
     }
 
-    const startEdit = (q: QualificationQuestion) => {
-        setEditingId(q.id)
-        setEditValue(q.question_text)
+    const startEdit = (question: QualificationQuestion) => {
+        setEditingId(question.id)
+        setEditValue(question.question_text)
     }
 
     const saveEdit = async (id: string) => {
@@ -69,6 +69,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
             setEditingId(null)
             return
         }
+
         setErrorMsg('')
         startTransition(async () => {
             const res = await updateQualificationQuestion(id, { question_text: editValue })
@@ -77,22 +78,16 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
         })
     }
 
-    // --- Drag and Drop Handlers ---
     const onDragStart = (e: React.DragEvent, index: number) => {
         setDraggedIdx(index)
         e.dataTransfer.effectAllowed = 'move'
-        // Subtle opacity to dragged item
-        const target = e.target as HTMLElement
-        if (target instanceof HTMLElement) {
-            setTimeout(() => target.classList.add('opacity-50'), 0)
-        }
+        const target = e.currentTarget
+        setTimeout(() => target.classList.add('opacity-50'), 0)
     }
 
     const onDragEnd = (e: React.DragEvent) => {
         setDraggedIdx(null)
-        if (e.target instanceof HTMLElement) {
-            e.target.classList.remove('opacity-50')
-        }
+        e.currentTarget.classList.remove('opacity-50')
     }
 
     const onDragOver = (index: number) => {
@@ -100,8 +95,6 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
 
         const newQuestions = [...questions]
         const draggedItem = newQuestions[draggedIdx]
-
-        // Remove item from origin and insert at target
         newQuestions.splice(draggedIdx, 1)
         newQuestions.splice(index, 0, draggedItem)
 
@@ -111,9 +104,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
 
     const onDrop = async () => {
         if (draggedIdx === null) return
-
-        // Save new order to backend
-        const newOrderIds = questions.map(q => q.id)
+        const newOrderIds = questions.map((question) => question.id)
         startTransition(async () => {
             const res = await updateQuestionOrdering(newOrderIds)
             if (!res.success) setErrorMsg(res.message || 'Erro ao salvar nova ordem.')
@@ -121,112 +112,100 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
     }
 
     return (
-        <section className="bg-white shadow rounded-lg p-6 mb-8 border border-gray-200">
-            <div className="mb-6 border-b border-gray-200 pb-4">
-                <h2 className="text-xl font-bold text-gray-900">3. Perguntas de Qualificação</h2>
-                <p className="mt-1 text-sm text-gray-500">
-                    Crie perguntas simples e objetivas para a IA utilizar ao qualificar e coletar dados do lead. Arraste para reordenar.
-                </p>
-            </div>
-
-            {errorMsg && (
-                <div className="mb-4 rounded-md bg-red-50 p-4">
-                    <p className="text-sm font-medium text-red-800">{errorMsg}</p>
+        <div className="space-y-5">
+            {errorMsg ? (
+                <div className="rounded-2xl border border-[rgba(178,74,63,0.28)] bg-[var(--yrm-danger-soft)] p-4 text-sm text-[var(--yrm-danger)]">
+                    {errorMsg}
                 </div>
-            )}
+            ) : null}
 
-            {/* Add New Form */}
-            <form action={handleCreate} className="mb-6">
-                <div className="flex items-center gap-2">
-                    <input
-                        type="text"
-                        name="question_text"
-                        placeholder="Ex: Qual é a sua principal métrica de sucesso para este projeto?"
-                        className="flex-1 appearance-none block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        required
-                    />
-                    <SubmitBtn />
-                </div>
+            <form action={handleCreate} className="flex flex-col gap-3 sm:flex-row">
+                <input
+                    type="text"
+                    name="question_text"
+                    placeholder="Ex: Qual é a urgência comercial desse lead?"
+                    className="flex-1 rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)] px-4 py-3 text-sm text-[var(--yrm-ink)]"
+                    required
+                />
+                <SubmitBtn />
             </form>
 
-            {/* Questions List */}
-            <div className={`space-y-2 ${isPending ? 'opacity-60 pointer-events-none' : ''}`}>
+            <div className={`space-y-2 ${isPending ? 'pointer-events-none opacity-60' : ''}`}>
                 {questions.length === 0 ? (
-                    <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-md">
-                        <p className="text-sm text-gray-500">Nenhuma pergunta cadastrada. Comece adicionando uma acima.</p>
+                    <div className="rounded-2xl border border-dashed border-[var(--yrm-border-strong)] bg-[rgba(252,250,247,0.84)] p-6 text-sm text-[var(--yrm-muted)]">
+                        Nenhuma pergunta cadastrada. Adicione a primeira para compor a qualificação.
                     </div>
                 ) : (
-                    <ul className="divide-y divide-gray-200 border border-gray-200 rounded-md overflow-hidden">
-                        {questions.map((q, idx) => (
+                    <ul className="overflow-hidden rounded-2xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)]">
+                        {questions.map((question, idx) => (
                             <li
-                                key={q.id}
-                                className={`flex items-center p-3 sm:px-4 sm:py-3 bg-white transition-colors hover:bg-gray-50
-                                    ${q.is_active ? '' : 'bg-gray-100'}`}
+                                key={question.id}
+                                className={`flex items-center gap-3 border-b border-[rgba(183,166,148,0.35)] px-4 py-4 last:border-b-0 ${
+                                    question.is_active ? '' : 'bg-[rgba(111,101,93,0.08)]'
+                                }`}
                                 draggable
                                 onDragStart={(e) => onDragStart(e, idx)}
                                 onDragEnd={onDragEnd}
-                                onDragOver={(e) => { e.preventDefault(); onDragOver(idx); }}
+                                onDragOver={(e) => {
+                                    e.preventDefault()
+                                    onDragOver(idx)
+                                }}
                                 onDrop={onDrop}
                             >
-                                <div className="flex items-center h-full mr-3 cursor-grab text-gray-400 hover:text-gray-600">
+                                <div className="cursor-grab text-[var(--yrm-muted-soft)]">
                                     <GripVerticalIcon className="h-5 w-5" />
                                 </div>
 
-                                <div className="flex-1 min-w-0 pr-4">
-                                    {editingId === q.id ? (
+                                <div className="min-w-0 flex-1 pr-2">
+                                    {editingId === question.id ? (
                                         <div className="flex items-center gap-2">
                                             <input
                                                 autoFocus
                                                 type="text"
                                                 value={editValue}
                                                 onChange={(e) => setEditValue(e.target.value)}
-                                                className="flex-1 block w-full px-2 py-1 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                className="flex-1 rounded-xl border border-[var(--yrm-border-strong)] bg-[var(--yrm-surface)] px-3 py-2 text-sm text-[var(--yrm-ink)]"
                                                 onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') saveEdit(q.id)
+                                                    if (e.key === 'Enter') saveEdit(question.id)
                                                     if (e.key === 'Escape') setEditingId(null)
                                                 }}
                                             />
-                                            <button type="button" onClick={() => saveEdit(q.id)} className="text-green-600 hover:text-green-800 p-1">
+                                            <button type="button" onClick={() => saveEdit(question.id)} className="rounded-lg p-1 text-[var(--yrm-human)] hover:bg-[var(--yrm-human-soft)]">
                                                 <CheckIcon className="h-5 w-5" />
                                             </button>
-                                            <button type="button" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                                            <button type="button" onClick={() => setEditingId(null)} className="rounded-lg p-1 text-[var(--yrm-muted)] hover:bg-[var(--yrm-surface-strong)]">
                                                 <X className="h-5 w-5" />
                                             </button>
                                         </div>
                                     ) : (
-                                        <p className={`text-sm font-medium ${q.is_active ? 'text-gray-900' : 'text-gray-500 line-through'}`}>
-                                            {q.question_text}
+                                        <p className={`text-sm leading-6 ${question.is_active ? 'text-[var(--yrm-ink)]' : 'text-[var(--yrm-muted)] line-through'}`}>
+                                            {question.question_text}
                                         </p>
                                     )}
                                 </div>
 
-                                <div className="flex items-center gap-2 ml-auto shrink-0">
-                                    {/* Toggle Active Status */}
+                                <div className="ml-auto flex shrink-0 items-center gap-1">
                                     <button
                                         type="button"
-                                        onClick={() => handleToggleActive(q.id, q.is_active)}
-                                        className={`p-1.5 rounded-md ${q.is_active ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-200'} transition-colors`}
-                                        title={q.is_active ? "Desativar pergunta" : "Ativar pergunta"}
+                                        onClick={() => handleToggleActive(question.id, question.is_active)}
+                                        className="rounded-lg p-2 text-[var(--yrm-human)] hover:bg-[var(--yrm-human-soft)]"
+                                        title={question.is_active ? 'Desativar pergunta' : 'Ativar pergunta'}
                                     >
-                                        {q.is_active ? <PowerIcon className="h-4 w-4" /> : <PowerOffIcon className="h-4 w-4" />}
+                                        {question.is_active ? <PowerIcon className="h-4 w-4" /> : <PowerOffIcon className="h-4 w-4" />}
                                     </button>
-
-                                    {/* Edit Button */}
                                     <button
                                         type="button"
-                                        onClick={() => startEdit(q)}
+                                        onClick={() => startEdit(question)}
                                         disabled={editingId !== null}
-                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50"
+                                        className="rounded-lg p-2 text-[var(--yrm-cold)] hover:bg-[var(--yrm-cold-soft)] disabled:opacity-50"
                                         title="Editar texto"
                                     >
                                         <PencilIcon className="h-4 w-4" />
                                     </button>
-
-                                    {/* Delete Button */}
                                     <button
                                         type="button"
-                                        onClick={() => handleDelete(q.id)}
-                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                        onClick={() => handleDelete(question.id)}
+                                        className="rounded-lg p-2 text-[var(--yrm-danger)] hover:bg-[var(--yrm-danger-soft)]"
                                         title="Apagar pergunta"
                                     >
                                         <Trash2Icon className="h-4 w-4" />
@@ -237,7 +216,7 @@ export default function QuestionsManager({ initialQuestions }: { initialQuestion
                     </ul>
                 )}
             </div>
-        </section>
+        </div>
     )
 }
 
@@ -247,10 +226,10 @@ function SubmitBtn() {
         <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-xl border border-[var(--yrm-accent)] bg-[var(--yrm-accent)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--yrm-accent-strong)] disabled:opacity-50"
         >
-            <PlusIcon className="h-5 w-5 mr-1" />
-            <span>Adicionar</span>
+            <PlusIcon className="mr-1 h-5 w-5" />
+            Adicionar
         </button>
     )
 }

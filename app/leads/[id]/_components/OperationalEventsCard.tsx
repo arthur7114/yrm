@@ -1,5 +1,3 @@
-'use client'
-
 import { Clock3, GitBranchPlus, MessageSquare, Tags, UserRoundPlus } from 'lucide-react'
 
 import { leadStatusLabels, normalizeLeadStatus } from '@/lib/lead-domain'
@@ -80,27 +78,31 @@ export default function OperationalEventsCard({ events }: { events: LeadOperatio
     }
 
     return (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-6 py-4">
-                <Clock3 className="h-4 w-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-900">Eventos Operacionais</h3>
-                <span className="ml-auto text-xs font-medium text-gray-400">{events.length} eventos</span>
+        <div className="yrm-panel overflow-hidden rounded-2xl">
+            <div className="flex items-center gap-2 border-b border-[rgba(183,166,148,0.5)] bg-[var(--yrm-surface-strong)] px-6 py-4">
+                <Clock3 className="h-4 w-4 text-[var(--yrm-muted)]" />
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
+                    Eventos operacionais
+                </h3>
+                <span className="ml-auto font-mono text-xs uppercase tracking-[0.16em] text-[var(--yrm-muted-soft)]">
+                    {events.length} eventos
+                </span>
             </div>
-            <div className="max-h-[360px] divide-y divide-gray-100 overflow-y-auto">
+            <div className="max-h-[360px] divide-y divide-[rgba(183,166,148,0.4)] overflow-y-auto">
                 {events.map((event) => {
                     const copy = getEventCopy(event)
 
                     return (
                         <div key={event.event_id} className="space-y-2 px-6 py-4">
                             <div className="flex items-center gap-2">
-                                <copy.Icon className="h-4 w-4 text-gray-500" />
-                                <p className="text-sm font-medium text-gray-900">{copy.title}</p>
-                                <span className="ml-auto text-[11px] text-gray-400">
+                                <copy.Icon className="h-4 w-4 text-[var(--yrm-muted)]" />
+                                <p className="text-sm font-medium text-[var(--yrm-ink)]">{copy.title}</p>
+                                <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yrm-muted-soft)]">
                                     {formatTimestamp(event.occurred_at)}
                                 </span>
                             </div>
-                            <p className="text-sm leading-relaxed text-gray-600">{copy.description}</p>
-                            <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-gray-400">
+                            <p className="text-sm leading-6 text-[var(--yrm-muted)]">{copy.description}</p>
+                            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yrm-muted-soft)]">
                                 <span>{event.source}</span>
                                 <span>•</span>
                                 <span>{event.event_type}</span>

@@ -426,6 +426,7 @@ async function createLead(ownerUserId: string, leadRef: CanonicalLeadRef) {
       phone_number: leadRef.phone_number || null,
       external_session_id: leadRef.external_session_id,
       current_status: 'novo',
+      current_classification: 'frio',
     })
     .select(
       'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at'

@@ -1,16 +1,20 @@
-'use client'
-
-import { ClassificationEvent } from '../actions'
 import { ArrowRight, Clock, History } from 'lucide-react'
 
-const classificationConfig: Record<string, { label: string; icon: string; color: string; bg: string; border: string }> = {
-    'frio': { label: 'Frio', icon: '❄️', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
-    'morno': { label: 'Morno', icon: '✨', color: 'text-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-200' },
-    'quente': { label: 'Quente', icon: '🔥', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
+import { ClassificationEvent } from '../actions'
+
+const classificationConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    frio: { label: 'Frio', color: 'text-[var(--yrm-cold)]', bg: 'bg-[var(--yrm-cold-soft)]', border: 'border-[rgba(78,122,148,0.28)]' },
+    morno: { label: 'Morno', color: 'text-[var(--yrm-warm)]', bg: 'bg-[var(--yrm-warm-soft)]', border: 'border-[rgba(201,133,29,0.3)]' },
+    quente: { label: 'Quente', color: 'text-[var(--yrm-danger)]', bg: 'bg-[var(--yrm-danger-soft)]', border: 'border-[rgba(178,74,63,0.28)]' },
 }
 
 function getConfig(cls: string) {
-    return classificationConfig[cls?.toLowerCase()] || { label: cls, icon: '❓', color: 'text-gray-700', bg: 'bg-gray-50', border: 'border-gray-200' }
+    return classificationConfig[cls?.toLowerCase()] || {
+        label: cls,
+        color: 'text-[var(--yrm-muted)]',
+        bg: 'bg-[var(--yrm-surface-strong)]',
+        border: 'border-[var(--yrm-border)]',
+    }
 }
 
 function formatDate(dateStr: string) {
@@ -29,45 +33,39 @@ export default function ClassificationHistory({ events }: { events: Classificati
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-                <History className="h-4 w-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-900">
-                    Histórico de Classificação
+        <div className="yrm-panel overflow-hidden rounded-2xl">
+            <div className="flex items-center gap-2 border-b border-[rgba(183,166,148,0.5)] bg-[var(--yrm-surface-strong)] px-6 py-4">
+                <History className="h-4 w-4 text-[var(--yrm-muted)]" />
+                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
+                    Histórico de classificação
                 </h3>
-                <span className="ml-auto text-xs text-gray-400 font-medium">
-                    {events.length} {events.length === 1 ? 'mudança' : 'mudanças'}
+                <span className="ml-auto font-mono text-xs uppercase tracking-[0.16em] text-[var(--yrm-muted-soft)]">
+                    {events.length} mudanças
                 </span>
             </div>
 
-            <div className="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
+            <div className="max-h-[320px] divide-y divide-[rgba(183,166,148,0.4)] overflow-y-auto">
                 {events.map((event) => {
                     const prevConfig = getConfig(event.previous_classification)
-                    const newConfig = getConfig(event.new_classification)
+                    const nextConfig = getConfig(event.new_classification)
 
                     return (
-                        <div key={event.id} className="px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                            {/* Classification transition */}
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${prevConfig.bg} ${prevConfig.color} ${prevConfig.border}`}>
-                                    {prevConfig.icon} {prevConfig.label}
+                        <div key={event.id} className="space-y-2 px-6 py-4">
+                            <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${prevConfig.bg} ${prevConfig.color} ${prevConfig.border}`}>
+                                    {prevConfig.label}
                                 </span>
-                                <ArrowRight className="h-3 w-3 text-gray-400 shrink-0" />
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${newConfig.bg} ${newConfig.color} ${newConfig.border}`}>
-                                    {newConfig.icon} {newConfig.label}
+                                <ArrowRight className="h-3 w-3 text-[var(--yrm-muted-soft)]" />
+                                <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${nextConfig.bg} ${nextConfig.color} ${nextConfig.border}`}>
+                                    {nextConfig.label}
                                 </span>
                             </div>
 
-                            {/* Reason */}
-                            {event.reason && (
-                                <p className="text-xs text-gray-600 leading-relaxed mb-1.5 line-clamp-3">
-                                    {event.reason}
-                                </p>
-                            )}
+                            {event.reason ? (
+                                <p className="text-sm leading-6 text-[var(--yrm-muted)]">{event.reason}</p>
+                            ) : null}
 
-                            {/* Timestamp */}
-                            <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                            <div className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yrm-muted-soft)]">
                                 <Clock className="h-3 w-3" />
                                 {formatDate(event.created_at)}
                             </div>

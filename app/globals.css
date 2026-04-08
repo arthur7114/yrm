@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f1ea;
+  --foreground: #1f1a17;
+  --yrm-bg: #f5f1ea;
+  --yrm-surface: #fcfaf7;
+  --yrm-surface-strong: #f2ece4;
+  --yrm-border: #d9cec3;
+  --yrm-border-strong: #b7a694;
+  --yrm-ink: #1f1a17;
+  --yrm-muted: #6f655d;
+  --yrm-muted-soft: #978b80;
+  --yrm-accent: #b86434;
+  --yrm-accent-strong: #8d4d2c;
+  --yrm-danger: #b24a3f;
+  --yrm-danger-soft: #f3ddd8;
+  --yrm-warm: #c9851d;
+  --yrm-warm-soft: #f2e4c8;
+  --yrm-cold: #4e7a94;
+  --yrm-cold-soft: #dce7ee;
+  --yrm-human: #2f6a55;
+  --yrm-human-soft: #dbeae2;
+  --yrm-shadow: 0 10px 30px rgba(31, 26, 23, 0.06);
 }
 
 @theme inline {
@@ -12,15 +31,67 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(184, 100, 52, 0.08), transparent 24%),
+    linear-gradient(180deg, #f8f4ee 0%, var(--yrm-bg) 28%, #f1ece5 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::selection {
+  background: rgba(184, 100, 52, 0.18);
+  color: var(--yrm-ink);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(184, 100, 52, 0.18);
+}
+
+.yrm-shell {
+  min-height: calc(100vh - 4.5rem);
+}
+
+.yrm-panel {
+  background: var(--yrm-surface);
+  border: 1px solid var(--yrm-border);
+  box-shadow: var(--yrm-shadow);
+}
+
+.yrm-muted {
+  color: var(--yrm-muted);
+}
+
+.yrm-kicker {
+  color: var(--yrm-muted-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.yrm-grid {
+  background-image:
+    linear-gradient(rgba(183, 166, 148, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(183, 166, 148, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

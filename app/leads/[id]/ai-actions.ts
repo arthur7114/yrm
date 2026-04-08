@@ -34,7 +34,7 @@ async function getAuthClient() {
                 } else if (typeof tokens === 'object' && tokens.access_token) {
                     accessToken = tokens.access_token;
                 }
-            } catch (e) {
+            } catch {
                 accessToken = authCookie.value;
             }
 
@@ -205,11 +205,13 @@ Você DEVE obrigatoriamente retornar APENAS um objeto JSON válido, sem markdown
                 confidence_reason: reasonStr
             })
 
+        if (insertQualError) throw insertQualError
+
         // Success!
         revalidatePath(`/leads/${leadId}`)
         return { success: true }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("qualifyLeadViaAI Exception:", err)
         return { success: false, message: 'Ocorreu um erro interno durante a qualificação. Tente novamente mais tarde.' }
     }
@@ -344,7 +346,7 @@ REGRAS RÍGIDAS (SE QUEBRAR VOCÊ FALHOU):
 
         revalidatePath(`/leads/${leadId}`)
         return { success: true }
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("generateInitialResponseViaAI Exception:", err)
         return { success: false, message: 'Ocorreu um erro interno durante a geração da resposta. Tente novamente mais tarde.' }
     }
@@ -576,7 +578,7 @@ Avalie se o lead evoluiu ou regrediu. Retorne o JSON.`
             message: `Classificação alterada: ${currentClassification} → ${newClassification}`
         }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("reclassifyLeadViaAI Exception:", err)
         return { success: false, changed: false, message: 'Erro interno durante reclassificação. Classificação mantida.' }
     }
@@ -754,7 +756,7 @@ Se não souber a resposta com certeza, diga algo como "Para essa informação, n
         revalidatePath(`/leads/${leadId}`)
         return { success: true, responded: true }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("autoRespondToBasicQuestion Exception:", err)
         return { success: false, responded: false, message: 'Erro interno. Não respondido.' }
     }

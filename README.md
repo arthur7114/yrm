@@ -9,6 +9,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 N8N_LEAD_OWNER_USER_ID=
+N8N_INTEGRATION_BEARER_TOKEN=
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` é a chave recomendada para a rota de integração do n8n. Se ela não estiver definida, o app usa a chave pública como fallback.
@@ -43,6 +44,7 @@ Defina também as variáveis de ambiente no serviço:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `N8N_LEAD_OWNER_USER_ID`
+- `N8N_INTEGRATION_BEARER_TOKEN`
 
 ## Migração do banco
 
@@ -64,45 +66,73 @@ Endpoint completo atual:
 
 Status atual:
 
-- rota pública temporariamente
-- sem `Authorization`
+- rota autenticada com `Authorization: Bearer <N8N_INTEGRATION_BEARER_TOKEN>`
 - sem `x-api-key`
-- o corpo da requisição continua sendo validado
-
-Observação operacional:
-
-- isso só deve permanecer assim enquanto o endpoint não estiver amplamente exposto
-- mantenha o volume controlado
-- reative a autenticação antes de abrir a integração para produção mais ampla
+- aceita apenas envelope canônico v1
+- deduplica por `event_id` e, em `message.created`, também por `payload.external_message_id`
 
 Payload base:
 
 ```json
 {
-  "event": "message.created",
-  "external_session_id": "558592607356@s.whatsapp.net",
-  "phone_number": "558592607356",
-  "lead_name": "Arthur Brito",
-  "message_direction": "inbound",
-  "message_content": "Olá, quero entender a solução.",
-  "message_id": "wamid-123",
-  "content_type": "text",
-  "classification": "quente",
-  "lead_tier": "A",
-  "score": 23,
-  "status": "classificado",
-  "qualification_summary": "Lead com urgência e perfil decisor.",
+  "event_id": "execution-1:message.inbound:wamid-123",
+  "event_type": "message.created",
+  "event_version": 1,
+  "source": "n8n",
   "occurred_at": "2026-03-26T16:47:24.214Z",
+  "lead": {
+    "external_session_id": "558592607356@s.whatsapp.net",
+    "phone_number": "558592607356",
+    "lead_name": "Arthur Brito"
+  },
+  "payload": {
+    "direction": "inbound",
+    "sender_type": "lead",
+    "external_message_id": "wamid-123",
+    "content_type": "text",
+    "message_content": "Olá, quero entender a solução."
+  },
   "metadata": {
-    "source": "n8n",
+    "provider": "whatsapp",
     "conversation_id": "123",
-    "sender_id": "456"
+    "sender_id": "456",
+    "workflow_id": "uSyQG0p1lSp-T5-4HUI-C"
   }
 }
 ```
 
 Eventos aceitos:
 
-- `lead.created`
+- `message.created` com `payload.direction=inbound`
 - `lead.classified`
-- `message.created`
+- `message.created` com `payload.direction=outbound`
+
+Payload de `lead.classified`:
+
+```json
+{
+  "event_id": "execution-1:lead.classified:558592607356@s.whatsapp.net",
+  "event_type": "lead.classified",
+  "event_version": 1,
+  "source": "n8n",
+  "occurred_at": "2026-03-26T16:47:24.214Z",
+  "lead": {
+    "external_session_id": "558592607356@s.whatsapp.net",
+    "phone_number": "558592607356",
+    "lead_name": "Arthur Brito"
+  },
+  "payload": {
+    "temperatura": "quente",
+    "score": 23,
+    "tier": "A",
+    "qualification_summary": "Lead com urgência e perfil decisor.",
+    "target_status": "aguardando_humano"
+  },
+  "metadata": {
+    "provider": "whatsapp",
+    "conversation_id": "123",
+    "sender_id": "456",
+    "workflow_id": "uSyQG0p1lSp-T5-4HUI-C"
+  }
+}
+```

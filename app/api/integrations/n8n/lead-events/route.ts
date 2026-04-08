@@ -2,8 +2,42 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { badRequest, processLeadEvent, validateLeadEventPayload } from '@/lib/lead-events'
 
+function unauthorized(message: string) {
+  return NextResponse.json(
+    {
+      error: message,
+    },
+    { status: 401 }
+  )
+}
+
+function internalServerError(message: string) {
+  return NextResponse.json(
+    {
+      error: message,
+    },
+    { status: 500 }
+  )
+}
+
 export async function POST(request: NextRequest) {
-  // Temporary bypass: this endpoint is public while the n8n integration is being stabilized.
+  const expectedToken = process.env.N8N_INTEGRATION_BEARER_TOKEN
+
+  if (!expectedToken) {
+    return internalServerError('N8N_INTEGRATION_BEARER_TOKEN is not configured.')
+  }
+
+  const authorizationHeader = request.headers.get('authorization')
+
+  if (!authorizationHeader?.startsWith('Bearer ')) {
+    return unauthorized('Missing or invalid Authorization header.')
+  }
+
+  const providedToken = authorizationHeader.slice('Bearer '.length).trim()
+
+  if (!providedToken || providedToken !== expectedToken) {
+    return unauthorized('Invalid integration token.')
+  }
 
   let body: unknown
 
@@ -33,11 +67,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error'
 
-    return NextResponse.json(
-      {
-        error: message,
-      },
-      { status: 500 }
-    )
+    return internalServerError(message)
   }
 }

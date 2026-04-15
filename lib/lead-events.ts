@@ -13,6 +13,7 @@ import {
   normalizeLeadStatus,
 } from '@/lib/lead-domain'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { isHumanHandoffRedis } from '@/lib/redis'
 
 type ContentType = 'text' | 'audio' | 'image' | 'video' | 'attachment'
 type LeadEventSource = 'n8n' | 'app'
@@ -76,6 +77,7 @@ type LeadRecord = {
   current_classification: LeadTemperature | null
   last_classification_at: string | null
   last_status_changed_at: string | null
+  last_event_occurred_at: string | null
 }
 
 type DuplicateIntegrationEventRecord = {
@@ -381,7 +383,7 @@ async function findLead(ownerUserId: string, externalSessionId: string) {
     ()
     .from('leads')
     .select(
-      'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at'
+      'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at, last_event_occurred_at'
     )
     .eq('user_id', ownerUserId)
     .eq('external_session_id', externalSessionId)
@@ -429,7 +431,7 @@ async function createLead(ownerUserId: string, leadRef: CanonicalLeadRef) {
       current_classification: 'frio',
     })
     .select(
-      'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at'
+      'id, user_id, phone_number, external_session_id, lead_name, current_status, current_classification, last_classification_at, last_status_changed_at, last_event_occurred_at'
     )
     .single()
 
@@ -794,6 +796,9 @@ export async function processLeadEvent(event: CanonicalLeadEventEnvelope): Promi
     throw new Error('N8N_LEAD_OWNER_USER_ID is not configured')
   }
 
+  // Check Redis Handoff Status
+  const isHuman = await isHumanHandoffRedis(event.lead.external_session_id)
+
   const duplicateByEvent = await findRecordedIntegrationEvent(event.event_id)
 
   if (duplicateByEvent) {
@@ -801,9 +806,18 @@ export async function processLeadEvent(event: CanonicalLeadEventEnvelope): Promi
   }
 
   if (isMessageCreatedEvent(event)) {
+    // We always process message events to keep history, but we'll apply "Last Event Wins" inside
     const result = await processMessageCreatedEvent(ownerUserId, event)
 
     if (!result.duplicateEvent) {
+      // Update last_event_occurred_at if this event is indeed the newest
+      const lead = await findLead(ownerUserId, event.lead.external_session_id)
+      if (lead && (!lead.last_event_occurred_at || new Date(event.occurred_at) >= new Date(lead.last_event_occurred_at))) {
+        await supabaseAdmin().from('leads').update({
+          last_event_occurred_at: parseOccurredAt(event.occurred_at)
+        }).eq('id', lead.id)
+      }
+
       revalidatePath('/')
       revalidatePath(`/leads/${result.leadId}`)
     }
@@ -816,13 +830,45 @@ export async function processLeadEvent(event: CanonicalLeadEventEnvelope): Promi
   }
 
   const lead = await requireExistingLead(ownerUserId, event.lead)
+
+  // BLOQUEIO DE HANDOFF: Se está em handoff humano, ignoramos novas classificações da IA
+  if (isHuman) {
+    console.log(`Skipping classification for lead ${lead.id} because it is in human handoff.`)
+    return {
+      leadId: lead.id,
+      eventType: event.event_type,
+      createdLead: false,
+      createdMessage: false,
+      createdNotification: false,
+      duplicateEvent: false,
+    }
+  }
+
   const recordedEvent = await recordIntegrationEvent(lead.id, event)
 
   if (recordedEvent.duplicate) {
     return buildDuplicateResult(lead.id, event.event_type)
   }
 
+  // ORDENAÇÃO: Só aplica se for o evento mais recente
+  if (lead.last_event_occurred_at && new Date(event.occurred_at) < new Date(lead.last_event_occurred_at)) {
+    console.log(`Skipping state update for event ${event.event_id} because a newer event was already processed.`)
+    return {
+      leadId: lead.id,
+      eventType: event.event_type,
+      createdLead: false,
+      createdMessage: false,
+      createdNotification: false,
+      duplicateEvent: false,
+    }
+  }
+
   const createdNotification = await applyClassificationEvent(ownerUserId, lead, event)
+
+  // Update last_event_occurred_at
+  await supabaseAdmin().from('leads').update({
+    last_event_occurred_at: parseOccurredAt(event.occurred_at)
+  }).eq('id', lead.id)
 
   revalidatePath('/')
   revalidatePath(`/leads/${lead.id}`)

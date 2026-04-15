@@ -16,8 +16,8 @@ export default function SectionPanel({
     className = '',
 }: SectionPanelProps) {
     return (
-        <section className={`yrm-panel overflow-hidden rounded-[1.75rem] ${className}`.trim()}>
-            <header className="flex flex-col gap-4 border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-5 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
+        <section className={`yrm-panel overflow-hidden rounded-2xl ${className}`.trim()}>
+            <header className="flex flex-col gap-4 border-b border-[var(--yrm-border)] px-5 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
                 <div className="space-y-1">
                     <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
                         {title}

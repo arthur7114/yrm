@@ -1,8 +1,9 @@
 'use server'
 
-import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase-server'
+
+import { activateHumanHandoff, revertToAiHandoff } from '@/lib/lead-handoff'
 
 import {
     type LeadOperationalStatus,
@@ -16,6 +17,7 @@ export interface LeadDetails {
     external_session_id?: string | null
     current_classification: string | null
     current_status: string
+    is_human_handoff: boolean
     created_at: string
 }
 
@@ -61,51 +63,6 @@ type LeadAccessResult = {
 type DeleteDependencyResult = {
     success: boolean
     message?: string
-}
-
-async function getAuthClient() {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-                detectSessionInUrl: false,
-            }
-        }
-    )
-
-    const cookieStore = await cookies()
-    let user: User | null = null
-
-    try {
-        const allCookies = cookieStore.getAll()
-        const authCookie = allCookies.find(c => c.name.endsWith('-auth-token'))
-
-        if (authCookie) {
-            let accessToken = null
-            try {
-                const tokens = JSON.parse(authCookie.value)
-                if (Array.isArray(tokens) && tokens.length > 0) {
-                    accessToken = tokens[0]
-                } else if (typeof tokens === 'object' && tokens.access_token) {
-                    accessToken = tokens.access_token
-                }
-            } catch {
-                accessToken = authCookie.value
-            }
-
-            if (accessToken) {
-                const { data } = await supabase.auth.getUser(accessToken)
-                user = data.user
-            }
-        }
-    } catch (err) {
-        console.error('Auth parsing error:', err)
-    }
-
-    return { supabase, user }
 }
 
 async function ensureLeadAccess(
@@ -218,7 +175,8 @@ async function insertStatusChangeEvent(
 }
 
 export async function getLeadDetails(leadId: number): Promise<FetchState<LeadDetails>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const { data, error } = await supabase
@@ -241,7 +199,8 @@ export async function getLeadDetails(leadId: number): Promise<FetchState<LeadDet
 }
 
 export async function getLeadMessages(leadId: number): Promise<FetchState<LeadMessage[]>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -268,7 +227,8 @@ export async function sendSimulatedMessage(leadId: number, content: string): Pro
         return { success: false, message: 'A mensagem não pode estar vazia.' }
     }
 
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -340,7 +300,8 @@ export type LeadQualification = {
 }
 
 export async function getLeadQualification(leadId: number): Promise<FetchState<LeadQualification | null>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const { data, error } = await supabase
@@ -369,7 +330,8 @@ export type ClassificationEvent = {
 }
 
 export async function getClassificationEvents(leadId: number): Promise<FetchState<ClassificationEvent[]>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado', data: [] }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -392,7 +354,8 @@ export async function getClassificationEvents(leadId: number): Promise<FetchStat
 }
 
 export async function getOperationalEvents(leadId: number): Promise<FetchState<LeadOperationalEvent[]>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado', data: [] }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -424,7 +387,8 @@ export type HandoffContext = {
 }
 
 export async function handoffLeadToHuman(leadId: number): Promise<FetchState> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     try {
@@ -538,7 +502,8 @@ export async function handoffLeadToHuman(leadId: number): Promise<FetchState> {
 }
 
 export async function claimLeadForHuman(leadId: number): Promise<FetchState> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -586,7 +551,8 @@ export async function claimLeadForHuman(leadId: number): Promise<FetchState> {
 }
 
 export async function closeLeadConversation(leadId: number): Promise<FetchState> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -634,7 +600,8 @@ export async function closeLeadConversation(leadId: number): Promise<FetchState>
 }
 
 export async function getHandoffContext(leadId: number): Promise<FetchState<HandoffContext | null>> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -659,7 +626,8 @@ export async function getHandoffContext(leadId: number): Promise<FetchState<Hand
 }
 
 export async function updateLead(leadId: number, fields: { lead_name: string; phone_number: string }): Promise<FetchState> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const name = fields.lead_name?.trim()
@@ -693,7 +661,8 @@ export async function updateLead(leadId: number, fields: { lead_name: string; ph
 }
 
 export async function deleteLead(leadId: number): Promise<FetchState> {
-    const { supabase, user } = await getAuthClient()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, message: 'Não autenticado' }
 
     const access = await ensureLeadAccess(supabase, user.id, leadId)
@@ -730,3 +699,57 @@ export async function deleteLead(leadId: number): Promise<FetchState> {
     revalidatePath(`/leads/${leadId}`)
     return { success: true }
 }
+
+/**
+ * Switches a lead to human attendance mode (is_human_handoff = true).
+ * Called from the HandoffToggle component.
+ */
+export async function activateHandoffToggle(leadId: number): Promise<FetchState> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, message: 'Não autenticado' }
+
+    const access = await ensureLeadAccess(supabase, user.id, leadId)
+    if (!access.lead) {
+        return { success: false, message: access.error || 'Lead não encontrado.' }
+    }
+
+    const result = await activateHumanHandoff({
+        leadId,
+        requestedBy: 'operator',
+        summaryContext: 'Handoff ativado manualmente no app.',
+    })
+
+    if (!result.ok) {
+        return { success: false, message: result.error }
+    }
+
+    return { success: true }
+}
+
+/**
+ * Reverts a lead back to AI attendance mode (is_human_handoff = false).
+ * Called from the HandoffToggle component.
+ */
+export async function revertHandoffToggle(leadId: number): Promise<FetchState> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, message: 'Não autenticado' }
+
+    const access = await ensureLeadAccess(supabase, user.id, leadId)
+    if (!access.lead) {
+        return { success: false, message: access.error || 'Lead não encontrado.' }
+    }
+
+    const result = await revertToAiHandoff({
+        leadId,
+        revertedBy: 'operator',
+    })
+
+    if (!result.ok) {
+        return { success: false, message: result.error }
+    }
+
+    return { success: true }
+}
+

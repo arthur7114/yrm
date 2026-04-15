@@ -72,8 +72,26 @@ export function normalizeLeadTier(value: unknown): LeadTier | null {
   return LEAD_TIERS.includes(normalized as LeadTier) ? (normalized as LeadTier) : null
 }
 
+export const HANDOFF_MODES = ['ia', 'humano'] as const
+export type HandoffMode = (typeof HANDOFF_MODES)[number]
+
 export function isHumanOwnedStatus(status: LeadOperationalStatus | null | undefined) {
   return status === 'em_atendimento_humano' || status === 'encerrado'
+}
+
+/** Returns true when the lead is under human attendance (AI must not reply). */
+export function isHumanHandoff(isHumanHandoffFlag: boolean | null | undefined): boolean {
+  return isHumanHandoffFlag === true
+}
+
+/** Returns true when the lead is still being handled by AI. */
+export function isAiHandoff(isHumanHandoffFlag: boolean | null | undefined): boolean {
+  return !isHumanHandoffFlag
+}
+
+/** Map the boolean toggle to a readable display value. */
+export function handoffModeLabel(isHumanHandoffFlag: boolean | null | undefined): string {
+  return isHumanHandoffFlag ? 'Humano' : 'IA'
 }
 
 export function isWaitingHumanStatus(status: LeadOperationalStatus | null | undefined) {

@@ -14,8 +14,8 @@ export default function LeadSummaryCard({ lead }: { lead: LeadDetails }) {
     })
 
     return (
-        <div className="yrm-panel sticky top-24 overflow-hidden rounded-[1.6rem]">
-            <div className="border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-5">
+        <div className="yrm-panel overflow-hidden rounded-2xl">
+            <div className="border-b border-[var(--yrm-border)] px-6 py-5">
                 <p className="yrm-kicker">Resumo do lead</p>
                 <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em] text-[var(--yrm-ink)]">
                     {displayName}

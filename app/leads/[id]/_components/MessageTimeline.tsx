@@ -18,8 +18,8 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
     }
 
     return (
-        <div className="yrm-panel flex min-h-[28rem] flex-col overflow-hidden rounded-[1.75rem]">
-            <div className="border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-4">
+        <div className="yrm-panel sticky top-24 flex h-[calc(100vh-14rem)] flex-col overflow-hidden rounded-2xl">
+            <div className="border-b border-[var(--yrm-border)] px-6 py-4">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
                     Timeline da conversa
                 </h2>
@@ -104,14 +104,14 @@ export default function MessageTimeline({ messages }: { messages: LeadMessage[] 
                                         </div>
 
                                         <div
-                                            className={`rounded-2xl px-4 py-3 ${
+                                            className={`rounded-xl px-4 py-2.5 ${
                                                 isAutomation
                                                     ? 'border border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] text-[var(--yrm-ink)]'
                                                     : isSystem
                                                       ? 'bg-[var(--yrm-accent)] text-[#090d14]'
                                                       : isHuman
                                                         ? 'bg-[var(--yrm-human)] text-[#04110d]'
-                                                        : 'border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] text-[var(--yrm-ink)]'
+                                                        : 'border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] text-[var(--yrm-ink)]'
                                             }`}
                                         >
                                             <p className="break-words whitespace-pre-wrap text-[15px] leading-relaxed">

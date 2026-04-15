@@ -78,8 +78,8 @@ export default function OperationalEventsCard({ events }: { events: LeadOperatio
     }
 
     return (
-        <div className="yrm-panel overflow-hidden rounded-[1.6rem]">
-            <div className="flex items-center gap-2 border-b border-[var(--yrm-border)] bg-[rgba(255,255,255,0.02)] px-6 py-4">
+        <div className="yrm-panel overflow-hidden rounded-2xl">
+            <div className="flex items-center gap-2 border-b border-[var(--yrm-border)] px-6 py-4">
                 <Clock3 className="h-4 w-4 text-[var(--yrm-muted)]" />
                 <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--yrm-ink)]">
                     Eventos operacionais

@@ -11,6 +11,7 @@ import { normalizeLeadStatus } from '@/lib/lead-domain'
 import ClassificationHistory from './_components/ClassificationHistory'
 import DeleteLeadDialog from './_components/DeleteLeadDialog'
 import HandoffContextBlock from './_components/HandoffContextBlock'
+import HandoffToggle from './_components/HandoffToggle'
 import LeadSummaryCard from './_components/LeadSummaryCard'
 import MessageTimeline from './_components/MessageTimeline'
 import OperationalEventsCard from './_components/OperationalEventsCard'
@@ -155,57 +156,57 @@ export default async function LeadDetailsPage({
                     title="Snapshot operacional"
                     description="Resumo rápido da posição atual do lead dentro do funil e da conversa."
                 >
-                    <div className="grid gap-4 lg:grid-cols-4">
-                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                            <p className="yrm-kicker">Status</p>
-                            <div className="mt-3">
+                    <div className="grid gap-6 lg:grid-cols-4">
+                        <div className="flex flex-col gap-1">
+                            <p className="yrm-kicker text-[10px]">Status</p>
+                            <div className="mt-1">
                                 <StatusBadge status={lead.current_status} />
                             </div>
                         </div>
-                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                            <p className="yrm-kicker">Temperatura</p>
-                            <div className="mt-3">
+                        <div className="flex flex-col gap-1">
+                            <p className="yrm-kicker text-[10px]">Temperatura</p>
+                            <div className="mt-1">
                                 <TemperatureBadge temperature={lead.current_classification} />
                             </div>
                         </div>
-                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                            <p className="yrm-kicker">Mensagens</p>
-                            <p className="mt-3 font-mono text-3xl font-semibold tracking-[-0.04em] text-[var(--yrm-ink)]">
+                        <div className="flex flex-col gap-1">
+                            <p className="yrm-kicker text-[10px]">Mensagens</p>
+                            <p className="mt-1 font-mono text-2xl font-semibold tracking-tight text-[var(--yrm-ink)]">
                                 {messages.length}
                             </p>
                         </div>
-                        <div className="rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                            <p className="yrm-kicker">Eventos</p>
-                            <p className="mt-3 font-mono text-3xl font-semibold tracking-[-0.04em] text-[var(--yrm-ink)]">
+                        <div className="flex flex-col gap-1">
+                            <p className="yrm-kicker text-[10px]">Eventos</p>
+                            <p className="mt-1 font-mono text-2xl font-semibold tracking-tight text-[var(--yrm-ink)]">
                                 {operationalEvents.length}
                             </p>
                         </div>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                            <Fingerprint className="h-4 w-4 text-[var(--yrm-muted)]" />
-                            <div>
-                                <p className="yrm-kicker">Sessão</p>
-                                <p className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--yrm-muted)]">
+                    <div className="mt-8 grid gap-6 border-t border-[var(--yrm-border)] pt-6 sm:grid-cols-3">
+                        <div className="flex items-center gap-3">
+                            <Fingerprint className="h-4 w-4 text-[var(--yrm-muted-soft)]" />
+                            <div className="min-w-0 flex-1">
+                                <p className="yrm-kicker text-[10px]">Sessão</p>
+                                <p className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--yrm-muted)]">
                                     {lead.external_session_id || 'Não informada'}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                            <MessageSquareText className="h-4 w-4 text-[var(--yrm-muted)]" />
-                            <div>
-                                <p className="yrm-kicker">Último preview</p>
-                                <p className="line-clamp-1 text-sm text-[var(--yrm-muted)]">
+                        <div className="flex items-center gap-3">
+                            <MessageSquareText className="h-4 w-4 text-[var(--yrm-muted-soft)]" />
+                            <div className="min-w-0 flex-1">
+                                <p className="yrm-kicker text-[10px]">Último preview</p>
+                                <p className="truncate text-xs text-[var(--yrm-muted)]">
                                     {messages[messages.length - 1]?.message_content || 'Sem mensagens'}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 rounded-[1.5rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                            <AudioLines className="h-4 w-4 text-[var(--yrm-muted)]" />
-                            <div>
-                                <p className="yrm-kicker">Modo da tela</p>
-                                <p className="text-sm text-[var(--yrm-muted)]">Somente leitura</p>
+                        <div className="flex items-center gap-3">
+                            <AudioLines className="h-4 w-4 text-[var(--yrm-muted-soft)]" />
+                            <div className="min-w-0 flex-1">
+                                <p className="yrm-kicker text-[10px]">Modo da tela</p>
+                                <p className="text-xs text-[var(--yrm-muted)]">Somente leitura</p>
                             </div>
                         </div>
                     </div>
@@ -213,6 +214,7 @@ export default async function LeadDetailsPage({
 
                 <div className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
                     <div className="space-y-6">
+                        <HandoffToggle leadId={leadId} isHumanHandoff={lead.is_human_handoff} />
                         <LeadSummaryCard lead={lead} />
                         <SectionPanel
                             title="Ação destrutiva"

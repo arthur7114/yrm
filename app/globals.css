@@ -23,7 +23,9 @@
   --yrm-cold-soft: rgba(99, 183, 244, 0.12);
   --yrm-human: #4cd4a2;
   --yrm-human-soft: rgba(76, 212, 162, 0.12);
-  --yrm-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+  --yrm-shadow: 0 12px 40px rgba(0, 0, 0, 0.24);
+  --yrm-radius: 12px;
+  --yrm-radius-lg: 18px;
 }
 
 @theme inline {
@@ -75,9 +77,7 @@ textarea:focus-visible {
 }
 
 .yrm-panel {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%),
-    var(--yrm-surface);
+  background: var(--yrm-surface);
   border: 1px solid var(--yrm-border);
   box-shadow: var(--yrm-shadow);
 }

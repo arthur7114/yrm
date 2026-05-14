@@ -76,8 +76,8 @@ export default async function HomePage({
         return (
             <AppShell
                 eyebrow="Dashboard executivo"
-                title="Falha ao carregar a operacao"
-                description="Nao foi possivel compor o painel executivo com os dados atuais."
+                title="Falha ao carregar a operação"
+                description="Não foi possível compor o painel executivo com os dados atuais."
             >
                 <div className="rounded-[1.6rem] border border-[rgba(255,116,102,0.24)] bg-[var(--yrm-danger-soft)] p-6 text-sm text-[var(--yrm-danger)]">
                     {error.message}
@@ -144,15 +144,15 @@ export default async function HomePage({
             ? {
                   id: 'hot-awaiting',
                   title: `${hotAwaitingHuman.length} lead(s) quente(s) aguardando humano`,
-                  body: 'Priorize atendimento para nao perder janelas de conversao ja qualificadas.',
+                  body: 'Priorize atendimento para não perder janelas de conversão já qualificadas.',
                   tone: 'danger' as const,
               }
             : null,
         staleUnclassified.length
             ? {
                   id: 'stale-unclassified',
-                  title: `${staleUnclassified.length} lead(s) sem classificacao ha mais de 24h`,
-                  body: 'Revise o fluxo de qualificacao para reduzir atraso entre entrada e leitura comercial.',
+                  title: `${staleUnclassified.length} lead(s) sem classificação há mais de 24h`,
+                  body: 'Revise o fluxo de qualificação para reduzir o atraso entre entrada e leitura comercial.',
                   tone: 'warm' as const,
               }
             : null,
@@ -160,7 +160,7 @@ export default async function HomePage({
             ? {
                   id: 'quiet-human-queue',
                   title: `${quietHumanQueue.length} lead(s) em fila humana sem atividade recente`,
-                  body: 'Verifique retomadas e gargalos na transicao da automacao para atendimento humano.',
+                  body: 'Verifique retomadas e gargalos na transição da automação para atendimento humano.',
                   tone: 'cold' as const,
               }
             : null,
@@ -184,8 +184,8 @@ export default async function HomePage({
     return (
         <AppShell
             eyebrow="Dashboard executivo"
-            title="Performance da operacao"
-            description="Acompanhe entrada, qualificacao e passagem para humano a partir dos eventos que movem a carteira."
+            title="Performance da operação"
+            description="Acompanhe entrada, qualificação e passagem para humano a partir dos eventos que movem a carteira."
             actions={
                 <div className="flex flex-wrap items-center gap-2">
                     {rangeOptions.map((option) => {
@@ -210,21 +210,21 @@ export default async function HomePage({
         >
             {allLeads.length === 0 ? (
                 <EmptyState
-                    title="A operacao ainda nao recebeu leads."
-                    description="Assim que os eventos comecarem a chegar, o dashboard passa a exibir funil, taxas e sinais de atencao."
+                    title="A operação ainda não recebeu leads."
+                    description="Assim que os eventos começarem a chegar, o dashboard passa a exibir funil, taxas e sinais de atenção."
                     action={
                         <Link
                             href="/settings"
                             className="rounded-2xl border border-[rgba(255,122,61,0.28)] bg-[var(--yrm-accent)] px-4 py-3 text-sm font-semibold text-[#090d14] hover:bg-[var(--yrm-accent-strong)]"
                         >
-                            Revisar configuracao operacional
+                            Revisar configuração operacional
                         </Link>
                     }
                 />
             ) : cohort.length === 0 ? (
                 <EmptyState
                     title="Nenhum lead entrou na janela selecionada."
-                    description="Amplie o periodo para voltar a enxergar funil, taxas e sinais da operacao recente."
+                    description="Amplie o período para voltar a enxergar funil, taxas e sinais da operação recente."
                 />
             ) : (
                 <div className="space-y-6">
@@ -239,7 +239,7 @@ export default async function HomePage({
                     <div className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
                         <SectionPanel
                             title="Funil e taxas"
-                            description="Leitura consolidada da qualidade e do avanco do pipeline dentro da janela selecionada."
+                            description="Leitura consolidada da qualidade e do avanço do pipeline dentro da janela selecionada."
                         >
                             <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
                                 <div className="space-y-4">
@@ -274,7 +274,7 @@ export default async function HomePage({
 
                                 <div className="space-y-4">
                                     <div className="rounded-[1.4rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                                        <p className="yrm-kicker">Taxa de qualificacao</p>
+                                        <p className="yrm-kicker">Taxa de qualificação</p>
                                         <p className="mt-2 font-mono text-4xl font-semibold tracking-[-0.06em] text-[var(--yrm-ink)]">
                                             {percentage(qualified.length, cohort.length)}
                                         </p>
@@ -286,7 +286,7 @@ export default async function HomePage({
                                         </p>
                                     </div>
                                     <div className="space-y-3 rounded-[1.4rem] border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] p-4">
-                                        <p className="yrm-kicker">Distribuicao termica</p>
+                                        <p className="yrm-kicker">Distribuição térmica</p>
                                         {[
                                             { label: 'Quente', value: hot.length, color: 'bg-[var(--yrm-danger)]' },
                                             { label: 'Morno', value: warm.length, color: 'bg-[var(--yrm-warm)]' },
@@ -312,7 +312,7 @@ export default async function HomePage({
 
                         <SectionPanel
                             title="Alertas operacionais"
-                            description="Excecoes que merecem leitura imediata antes de entrar na carteira."
+                            description="Exceções que merecem leitura imediata antes de entrar na carteira."
                             aside={
                                 <Link
                                     href="/leads"
@@ -345,7 +345,7 @@ export default async function HomePage({
                                 </div>
                             ) : (
                                 <p className="text-sm leading-6 text-[var(--yrm-muted)]">
-                                    Nenhum alerta critico nesta janela. A operacao esta sem excecoes de destaque.
+                                    Nenhum alerta crítico nesta janela. A operação está sem exceções de destaque.
                                 </p>
                             )}
                         </SectionPanel>
@@ -353,8 +353,8 @@ export default async function HomePage({
 
                     <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
                         <SectionPanel
-                            title="Pulso diario"
-                            description="Entrada e qualificacao em uma leitura compacta da janela atual."
+                            title="Pulso diário"
+                            description="Entrada e qualificação em uma leitura compacta da janela atual."
                         >
                             <div className="space-y-5">
                                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -372,7 +372,7 @@ export default async function HomePage({
                                             </p>
                                         </div>
                                         <div className="rounded-2xl border border-[var(--yrm-border)] bg-[rgba(255,255,255,0.03)] px-4 py-3">
-                                            <p className="yrm-kicker">Pico diario</p>
+                                            <p className="yrm-kicker">Pico diário</p>
                                             <p className="mt-2 font-mono text-2xl font-semibold tracking-[-0.05em] text-[var(--yrm-ink)]">
                                                 {maxSeriesValue}
                                             </p>
@@ -421,7 +421,7 @@ export default async function HomePage({
 
                         <SectionPanel
                             title="Leads em destaque"
-                            description="Recorte dos leads com maior prioridade dentro da janela atual."
+                            description="Recorte dos leads com maior prioridade dentro da janela atual — ordenados por temperatura e fila."
                         >
                             <div className="space-y-3">
                                 {recentPriorityLeads.map((lead) => (
@@ -433,7 +433,7 @@ export default async function HomePage({
                                         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <h3 className="text-sm font-semibold text-[var(--yrm-ink)] transition-transform duration-200 group-hover:translate-x-0.5">
-                                                    {lead.lead_name || lead.phone_number || 'Lead sem identificacao'}
+                                                    {lead.lead_name || lead.phone_number || 'Lead sem identificação'}
                                                 </h3>
                                                 <TemperatureBadge temperature={lead.current_classification} />
                                                 <StatusBadge status={lead.current_status} />
@@ -445,7 +445,7 @@ export default async function HomePage({
                                                 {lead.last_message_preview || 'Sem preview de mensagem registrado.'}
                                             </p>
                                             <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--yrm-muted-soft)]">
-                                                Ultima atividade {formatDate(new Date(lead.last_message_at || lead.created_at))}
+                                                Última atividade {formatDate(new Date(lead.last_message_at || lead.created_at))}
                                             </p>
                                         </div>
                                     </Link>

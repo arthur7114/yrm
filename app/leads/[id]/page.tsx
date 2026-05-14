@@ -9,7 +9,11 @@ import TemperatureBadge from '@/components/ui/TemperatureBadge'
 import { normalizeLeadStatus } from '@/lib/lead-domain'
 
 import ClassificationHistory from './_components/ClassificationHistory'
+import ClaimLeadButton from './_components/ClaimLeadButton'
+import CloseLeadButton from './_components/CloseLeadButton'
 import DeleteLeadDialog from './_components/DeleteLeadDialog'
+import EditLeadDialog from './_components/EditLeadDialog'
+import HandoffButton from './_components/HandoffButton'
 import HandoffContextBlock from './_components/HandoffContextBlock'
 import HandoffToggle from './_components/HandoffToggle'
 import LeadSummaryCard from './_components/LeadSummaryCard'
@@ -140,7 +144,7 @@ export default async function LeadDetailsPage({
         <AppShell
             eyebrow="Leitura do lead"
             title={displayName}
-            description="Histórico consolidado da conversa, da qualificação e dos eventos operacionais. Esta tela está em modo somente leitura."
+            description="Histórico consolidado da conversa, da qualificação e dos eventos operacionais deste lead."
             actions={
                 <Link
                     href={backHref}
@@ -205,8 +209,12 @@ export default async function LeadDetailsPage({
                         <div className="flex items-center gap-3">
                             <AudioLines className="h-4 w-4 text-[var(--yrm-muted-soft)]" />
                             <div className="min-w-0 flex-1">
-                                <p className="yrm-kicker text-[10px]">Modo da tela</p>
-                                <p className="text-xs text-[var(--yrm-muted)]">Somente leitura</p>
+                                <p className="yrm-kicker text-[10px]">Última atividade</p>
+                                <p className="truncate text-xs text-[var(--yrm-muted)]">
+                                    {lead.last_message_at
+                                        ? new Date(lead.last_message_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                                        : 'Sem atividade'}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -215,13 +223,34 @@ export default async function LeadDetailsPage({
                 <div className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
                     <div className="space-y-6">
                         <HandoffToggle leadId={leadId} isHumanHandoff={lead.is_human_handoff} />
+
+                        {normalizedStatus === 'aguardando_humano' && (
+                            <ClaimLeadButton leadId={leadId} />
+                        )}
+                        {normalizedStatus === 'em_atendimento_humano' && (
+                            <CloseLeadButton leadId={leadId} />
+                        )}
+                        {(normalizedStatus === 'novo' || normalizedStatus === 'em_qualificacao') && (
+                            <HandoffButton leadId={leadId} />
+                        )}
+
                         <LeadSummaryCard lead={lead} />
+
+                        <SectionPanel title="Editar lead" description="Atualize o nome ou telefone deste lead.">
+                            <EditLeadDialog
+                                leadId={leadId}
+                                currentName={lead.lead_name || ''}
+                                currentPhone={lead.phone_number || ''}
+                            />
+                        </SectionPanel>
+
                         <SectionPanel
                             title="Ação destrutiva"
                             description="Exclua este lead apenas quando tiver certeza. A remoção é permanente."
                         >
                             <DeleteLeadDialog leadId={leadId} backHref={backHref} />
                         </SectionPanel>
+
                         {qualification ? <QualificationResultBlock result={qualification} /> : null}
                         {handoffContext ? (
                             <HandoffContextBlock

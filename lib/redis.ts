@@ -42,13 +42,15 @@ export const REDIS_KEYS = {
  * Update the handoff status for a lead session.
  * HSET handoff {external_session_id} {status}
  */
-export async function setRedisHandoff(externalSessionId: string, status: 'human' | 'ai') {
+export async function setRedisHandoff(externalSessionId: string, status: 'human' | 'ai'): Promise<boolean> {
   try {
     await redis.hset(REDIS_KEYS.HANDOFF_HASH, externalSessionId, status)
+    return true
   } catch (error) {
-    console.error(`Failed to set redis handoff for ${externalSessionId}:`, error)
-    // We don't throw here to avoid breaking the main flow if Redis is down,
-    // though for handoff reliability we might want to rethink this.
+    // SAFETY: if Redis is down and status is 'human', n8n will default to 'ai' on next check
+    // and may auto-respond to a human-attended conversation. Monitor Redis health closely.
+    console.error(`[HANDOFF SAFETY] Failed to set redis handoff for ${externalSessionId} → ${status}:`, error)
+    return false
   }
 }
 

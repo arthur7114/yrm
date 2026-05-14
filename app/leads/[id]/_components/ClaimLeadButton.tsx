@@ -24,7 +24,7 @@ export default function ClaimLeadButton({ leadId }: { leadId: number }) {
             <button
                 onClick={handleClaim}
                 disabled={isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--yrm-human)] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
                 {isPending ? (
                     <>
@@ -39,7 +39,7 @@ export default function ClaimLeadButton({ leadId }: { leadId: number }) {
                 )}
             </button>
             {errorMsg ? (
-                <p className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
+                <p className="rounded-xl border border-[rgba(178,74,63,0.28)] bg-[var(--yrm-danger-soft)] px-3 py-2 text-sm text-[var(--yrm-danger)]">
                     {errorMsg}
                 </p>
             ) : null}

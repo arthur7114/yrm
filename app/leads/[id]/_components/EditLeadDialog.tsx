@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Pencil, Loader2, X, Check } from 'lucide-react'
+import { Check, Loader2, Pencil, X } from 'lucide-react'
+
 import { updateLead } from '../actions'
 
 export default function EditLeadDialog({ leadId, currentName, currentPhone }: {
@@ -54,65 +55,65 @@ export default function EditLeadDialog({ leadId, currentName, currentPhone }: {
         return (
             <button
                 onClick={handleOpen}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] px-4 py-2 text-sm font-medium text-[var(--yrm-muted)] transition-colors hover:border-[var(--yrm-border-strong)] hover:text-[var(--yrm-ink)]"
             >
                 <Pencil className="h-4 w-4" />
-                Editar Dados do Lead
+                Editar dados do lead
             </button>
         )
     }
 
     return (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Editar Lead</h3>
-                <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
+        <div className="overflow-hidden rounded-xl border border-[var(--yrm-border)] bg-[var(--yrm-surface)]">
+            <div className="flex items-center justify-between border-b border-[var(--yrm-border)] px-5 py-4">
+                <h3 className="text-sm font-semibold text-[var(--yrm-ink)]">Editar lead</h3>
+                <button onClick={() => setIsOpen(false)} className="text-[var(--yrm-muted-soft)] hover:text-[var(--yrm-ink)]">
                     <X className="h-4 w-4" />
                 </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="space-y-4 p-5">
                 <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Nome</label>
+                    <label className="yrm-kicker mb-1 block">Nome</label>
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full rounded-lg border border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] px-3 py-2 text-sm text-[var(--yrm-ink)] placeholder:text-[var(--yrm-muted-soft)] focus:border-[var(--yrm-accent)] focus:outline-none"
                         placeholder="Nome do lead"
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Telefone</label>
+                    <label className="yrm-kicker mb-1 block">Telefone</label>
                     <input
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full rounded-lg border border-[var(--yrm-border)] bg-[var(--yrm-surface-strong)] px-3 py-2 text-sm text-[var(--yrm-ink)] placeholder:text-[var(--yrm-muted-soft)] focus:border-[var(--yrm-accent)] focus:outline-none"
                         placeholder="Telefone"
                     />
                 </div>
 
                 {errorMsg && (
-                    <div className="p-2 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+                    <p className="rounded-xl border border-[rgba(178,74,63,0.28)] bg-[var(--yrm-danger-soft)] px-3 py-2 text-sm text-[var(--yrm-danger)]">
                         {errorMsg}
-                    </div>
+                    </p>
                 )}
                 {successMsg && (
-                    <div className="p-2 bg-green-50 text-green-600 text-sm rounded-md border border-green-100 flex items-center gap-2">
+                    <p className="flex items-center gap-2 rounded-xl border border-[rgba(76,212,162,0.22)] bg-[var(--yrm-human-soft)] px-3 py-2 text-sm text-[var(--yrm-human)]">
                         <Check className="h-4 w-4" /> {successMsg}
-                    </div>
+                    </p>
                 )}
 
                 <button
                     onClick={handleSubmit}
                     disabled={isPending}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--yrm-primary)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                     {isPending ? (
                         <><Loader2 className="h-4 w-4 animate-spin" /> Salvando...</>
                     ) : (
-                        'Salvar Alterações'
+                        'Salvar alterações'
                     )}
                 </button>
             </div>

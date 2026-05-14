@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { type SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase-server'
 
 import { activateHumanHandoff, revertToAiHandoff } from '@/lib/lead-handoff'
@@ -18,6 +19,7 @@ export interface LeadDetails {
     current_classification: string | null
     current_status: string
     is_human_handoff: boolean
+    last_message_at?: string | null
     created_at: string
 }
 
